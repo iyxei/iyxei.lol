@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<!--Author: @Fatal-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="profile">
+    <meta property="og:description" content="pinakamabit">
+    <meta property="og:image" content="https://media.discordapp.net/attachments/1413865012367327302/1422122867369181194/rarararansom.jpg?ex=6a5bd3e1&is=6a5a8261&hm=c1452df93322515a564b05dad23ef31f1a0232f8ccb2f95d423305ee9a3c7cf5&=&format=webp&width=637&height=362">
+    <meta name="theme-color" content="#000000">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700;900&display=swap');
+
+        :root {
+            --default-bg: url('https://i.pinimg.com/736x/f9/b6/93/f9b6931f143e4743e62adbd48a5159e7.jpg');
+            --player-album: url('https://i.pinimg.com/1200x/2d/91/54/2d915473b4ff950adb42159db370fe66.jpg');
+        }
+
+        body {
+            background-color: #050505;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            perspective: 1200px;
+        }
+
+        .ambient-bg {
+            position: absolute;
+            inset: -50px;
+            background-size: cover;
+            background-position: center;
+            filter: blur(50px) brightness(0.25);
+            z-index: 0;
+            opacity: 1;
+            background-image: var(--default-bg);
+        }
+
+        .entry-screen {
+            position: absolute;
+            inset: 0;
+            background: #050505;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .entry-screen.hidden-smooth {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.1);
+        }
+
+        .pop-anim {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            animation: popUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes popUp {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .enter-btn {
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.5em;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 16px 80px;
+            margin-top: 30px;
+            position: relative;
+            backdrop-filter: blur(15px);
+        }
+
+        .enter-btn:hover {
+            color: #fff;
+            letter-spacing: 0.6em;
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .profile-card {
+            position: relative;
+            z-index: 10;
+            width: 380px;
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(30px) saturate(1.5);
+            -webkit-backdrop-filter: blur(30px) saturate(1.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05), 0 20px 60px -15px rgba(0, 0, 0, 0.9), 0 0 80px rgba(255, 255, 255, 0.03);
+            opacity: 0;
+            transform-style: preserve-3d;
+            transform: rotateX(35deg) translateY(60px) scale(0.85);
+            transform-origin: center bottom;
+            transition: opacity 0.8s ease-out, transform 1.2s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+            flex-shrink: 0;
+        }
+
+        .profile-card::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
+            z-index: 6;
+            pointer-events: none;
+        }
+
+        .entered .profile-card {
+            opacity: 1;
+            transform: rotateX(0deg) translateY(0) scale(1);
+        }
+
+        .banner-container {
+            width: 100%;
+            height: 140px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            z-index: 2;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .banner-container:hover {
+            transform: perspective(600px) rotateY(-5deg) rotateX(3deg) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+        }
+
+        .banner-icons {
+            position: absolute;
+            bottom: 10px;
+            right: 12px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+            transform: translateZ(20px);
+        }
+
+        .banner-icons a {
+            color: rgba(255,255,255,0.8);
+            font-size: 20px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+            text-decoration: none;
+        }
+
+        .banner-icons a:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            width: 104px;
+            height: 104px;
+            margin: -52px auto 16px;
+            z-index: 3;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 6px solid #0a0a0a;
+            background: #0a0a0a;
+            object-fit: cover;
+            position: relative;
+            z-index: 3;
+        }
+
+        .decoration {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 111px;
+            height: 111px;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .status-wrapper {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            background: #0a0a0a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .status-dot { width: 16px; height: 16px; border-radius: 50%; }
+        .online { background: #23a55a; box-shadow: 0 0 12px rgba(35, 165, 90, 0.6); }
+        .idle { background: #f0b232; box-shadow: 0 0 12px rgba(240, 178, 50, 0.6); }
+        .dnd { background: #f23f43; box-shadow: 0 0 12px rgba(242, 63, 67, 0.6); }
+        .offline { background: #80848e; }
+
+        .custom-status-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-top: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            max-width: 100%;
+            z-index: 3;
+            position: relative;
+        }
+
+        .content-section {
+            background: rgba(0, 0, 0, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 24px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            z-index: 3;
+        }
+
+        .section-header {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 6px;
+        }
+
+        .activity-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .activity-art-wrapper {
+            position: relative;
+            width: 64px;
+            height: 64px;
+            flex-shrink: 0;
+        }
+
+        .activity-art {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        }
+
+        .spotify-bar {
+            width: 3px;
+            background: #1DB954;
+            border-radius: 2px;
+            animation: pulseHeight 0.7s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulseHeight { 0% { height: 4px; } 100% { height: 16px; } }
+
+        .chroma-player {
+            width: 380px;
+            margin-top: 16px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.8s ease-out 0.3s, transform 0.8s ease-out 0.3s, box-shadow 0.3s ease;
+            flex-shrink: 0;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .entered .chroma-player {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .chroma-player:hover {
+            box-shadow: 0 25px 45px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.15);
+            transform: perspective(600px) rotateY(4deg) rotateX(2deg) translateY(-4px);
+        }
+
+        .album-art-left {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            background-size: cover;
+            background-position: center;
+            background-image: var(--player-album);
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transform: translateZ(10px);
+        }
+
+        .player-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .track-info-row {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .track-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-artist {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 2px;
+        }
+
+        .time-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.5);
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #e74c3c;
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .control-btns {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .ctrl-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            transition: 0.2s;
+            opacity: 0.7;
+            font-size: 20px;
+        }
+
+        .ctrl-btn:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+        .ctrl-btn.play-btn {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 22px;
+        }
+
+        .extra-btns {
+            display: flex;
+            gap: 12px;
+            color: rgba(255,255,255,0.5);
+            font-size: 16px;
+        }
+
+        .extra-btns i {
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .extra-btns i:hover { color: #fff; }
+        .extra-btns i.active { color: #e74c3c; }
+
+        .main-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body x-data="profileCard('1441730271396364419')" :class="entered ? 'entered' : ''">
+
+    <div class="ambient-bg"></div>
+
+    <div class="entry-screen" :class="entered ? 'hidden-smooth' : ''">
+        <div class="flex flex-col items-center justify-center text-center">
+            <div class="pop-anim" style="animation-delay: 0.1s;">
+                <span class="text-white/50 uppercase tracking-widest text-sm mr-2 font-mono">larp me, it's free.</span>
+            </div>
+            <button class="enter-btn pop-anim" style="animation-delay: 0.3s;" @click="enter()">Enter</button>
+        </div>
+    </div>
+
+    <div class="main-content" x-show="entered" style="display: none;">
+        <div class="profile-card">
+            <div class="banner-container" :style="'background-image: url(' + banner + ')'">
+                
+            </div>
+            <div class="px-6 pb-2 text-center relative z-20">
+                <div class="avatar-wrapper">
+                    <img :src="avatar" class="avatar" alt="Avatar">
+                    <template x-if="decoration">
+                        <img :src="decoration" class="decoration" alt="Decoration">
+                    </template>
+                    <div class="status-wrapper">
+                        <div class="status-dot" :class="status"></div>
+                    </div>
+                </div>
+                <h1 class="text-2xl font-black tracking-tight text-white/95" x-text="name"></h1>
+                <p class="text-xs font-semibold text-white/40 tracking-[0.2em] uppercase mt-1" x-text="'@' + username"></p>
+                <template x-if="customStatus">
+                    <div class="custom-status-card">
+                        <template x-if="customStatusEmoji">
+                            <span x-text="customStatusEmoji" class="text-sm"></span>
+                        </template>
+                        <span class="text-xs font-medium text-white/80" x-text="customStatus"></span>
+                    </div>
+                </template>
+            </div>
+            <div class="content-section">
+                <div class="text-left">
+                    <h3 class="section-header">About Me</h3>
+                    <p class="text-[13px] text-white/70 leading-relaxed font-medium">always ransxm.</p>
+                </div>
+                <div class="text-left">
+                    <h3 class="section-header">Discord Member Since</h3>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-white/20"></div>
+                        <p class="text-[13px] text-white/90 font-medium" x-text="memberSince"></p>
+                    </div>
+                </div>
+                <div class="w-full h-[1px] bg-white/5 my-1"></div>
+                <template x-if="isSpotify">
+                    <div class="activity-box text-left">
+                        <div class="activity-art-wrapper">
+                            <img :src="spotify.album_art_url" class="activity-art">
+                        </div>
+                        <div class="overflow-hidden flex-1 py-1">
+                            <div class="flex items-center gap-2 mb-1.5">
+                                <span class="text-[10px] text-[#1DB954] font-black uppercase tracking-widest">Listening to Spotify</span>
+                                <div class="flex items-end gap-[2px] h-[16px] ml-auto">
+                                    <div class="spotify-bar" style="animation-delay: 0s"></div>
+                                    <div class="spotify-bar" style="animation-delay: 0.2s"></div>
+                                    <div class="spotify-bar" style="animation-delay: 0.4s"></div>
+                                </div>
+                            </div>
+                            <p class="text-white text-[13px] font-bold truncate leading-tight hover:underline cursor-pointer" x-text="spotify.song"></p>
+                            <p class="text-white/60 text-[11px] truncate mt-0.5" x-text="'by ' + spotify.artist"></p>
+                            <p class="text-white/40 text-[11px] truncate mt-0.5" x-text="'on ' + spotify.album"></p>
+                        </div>
+                    </div>
+                </template>
+                <template x-if="!isSpotify && hasActivity">
+                    <div class="activity-box text-left">
+                        <div class="activity-art-wrapper flex items-center justify-center bg-white/5 rounded-xl border border-white/10">
+                            <template x-if="activityImage">
+                                <img :src="activityImage" class="activity-art">
+                            </template>
+                            <template x-if="!activityImage">
+                                <svg class="w-8 h-8 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </template>
+                        </div>
+                        <div class="overflow-hidden flex-1 py-1">
+                            <span class="text-[10px] text-indigo-400 font-black uppercase tracking-widest mb-1.5 block" x-text="activity.type === 0 ? 'Playing a game' : 'Doing an activity'"></span>
+                            <p class="text-white text-[13px] font-bold truncate leading-tight" x-text="activity.name"></p>
+                            <p class="text-white/60 text-[11px] truncate mt-0.5" x-text="activity.details || ''"></p>
+                            <p class="text-white/40 text-[11px] truncate mt-0.5" x-text="activity.state || ''"></p>
+                        </div>
+                    </div>
+                </template>
+                <template x-if="!isSpotify && !hasActivity">
+                    <div class="text-center py-2">
+                        <p class="text-[11px] text-white/30 font-medium uppercase tracking-wider font-mono">No active presence detected</p>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div class="chroma-player" x-data="musicPlayer">
+            <div class="album-art-left" :style="'background-image: url(' + albumCover + ')'"></div>
+            <div class="player-right">
+                <div class="track-info-row">
+                    <span class="track-title">HEAVEN AND BACK</span>
+                    <span class="track-artist">Chase Atlantic</span>
+                </div>
+                <div class="progress-area">
+                    <span class="time-label" x-text="formatTime(currentTime)"></span>
+                    <div class="progress-bar" @click="seek">
+                        <div class="progress-fill" :style="'width:' + progress + '%'"></div>
+                    </div>
+                    <span class="time-label" x-text="formatTime(duration)"></span>
+                </div>
+                <div class="controls-row">
+                    <div class="control-btns">
+                        <button class="ctrl-btn" @click="prev"><i class='bx bx-skip-previous'></i></button>
+                        <button class="ctrl-btn play-btn" @click="toggle">
+                            <i class='bx' :class="playing ? 'bx-pause' : 'bx-play'"></i>
+                        </button>
+                        <button class="ctrl-btn" @click="next"><i class='bx bx-skip-next'></i></button>
+                    </div>
+                    <div class="extra-btns">
+                        <i class='bx bx-shuffle' :class="{ 'active': shuffle }" @click="shuffle = !shuffle"></i>
+                        <i class='bx bx-repeat' :class="{ 'active': repeat }" @click="repeat = !repeat"></i>
+                        <i class='bx bx-heart' :class="{ 'active': liked }" @click="liked = !liked"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audio = new Audio('https://file.garden/aTZTACJbkUlB55j2/Chase%20Atlantic%20-%20HEAVEN%20AND%20BACK.mp3');
+        audio.loop = false;
+
+        function profileCard(uid) {
+            return {
+                entered: false,
+                name: 'Loading...',
+                username: 'loading',
+                avatar: 'https://cdn.discordapp.com/embed/avatars/0.png',
+                banner: 'https://media.discordapp.net/attachments/1413865012367327302/1422122867369181194/rarararansom.jpg?ex=6a5bd3e1&is=6a5a8261&hm=c1452df93322515a564b05dad23ef31f1a0232f8ccb2f95d423305ee9a3c7cf5&=&format=webp&width=637&height=362',
+                decoration: null,
+                status: 'offline',
+                memberSince: 'Loading date...',
+                customStatus: '',
+                customStatusEmoji: '',
+                isSpotify: false,
+                spotify: {},
+                hasActivity: false,
+                activity: {},
+                activityImage: null,
+
+                enter() {
+                    this.entered = true;
+                    audio.play().catch(() => {});
+                },
+
+                calculateMemberSince() {
+                    try {
+                        const timestamp = Number((BigInt(uid) >> 22n) + 1420070400000n);
+                        const date = new Date(timestamp);
+                        this.memberSince = date.toLocaleDateString('en-US', {
+                            month: 'short', day: '2-digit', year: 'numeric'
+                        });
+                    } catch (e) {
+                        this.memberSince = 'Unknown Date';
+                    }
+                },
+
+                async init() {
+                    this.calculateMemberSince();
+                    const fetchPresence = async () => {
+                        try {
+                            const r = await fetch(`https://api.lanyard.rest/v1/users/${uid}`);
+                            const { data } = await r.json();
+                            const user = data.discord_user;
+                            this.name = user.global_name || user.username;
+                            this.username = user.username;
+                            this.status = data.discord_status;
+                            this.avatar = user.avatar
+                                ? `https://cdn.discordapp.com/avatars/${uid}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256`
+                                : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator) % 5 || 0}.png`;
+                            if (user.banner) {
+                                this.banner = `https://cdn.discordapp.com/banners/${uid}/${user.banner}.${user.banner.startsWith('a_') ? 'gif' : 'png'}?size=1024`;
+                            }
+                            const decAsset = user.avatar_decoration_data?.asset;
+                            this.decoration = decAsset ? `https://cdn.discordapp.com/avatar-decoration-presets/${decAsset}.png` : null;
+                            const customAct = data.activities.find(a => a.type === 4);
+                            this.customStatus = customAct ? customAct.state || '' : '';
+                            this.customStatusEmoji = customAct ? customAct.emoji?.name || '' : '';
+                            this.isSpotify = data.listening_to_spotify;
+                            if (this.isSpotify) this.spotify = data.spotify;
+                            const act = data.activities.find(a => a.type !== 4 && a.id !== "spotify:1");
+                            this.hasActivity = !!act;
+                            if (act) {
+                                this.activity = act;
+                                if (act.assets && act.assets.large_image) {
+                                    let img = act.assets.large_image;
+                                    this.activityImage = img.startsWith("mp:external/")
+                                        ? `https://media.discordapp.net/external/${img.replace("mp:external/", "")}`
+                                        : `https://cdn.discordapp.com/app-assets/${act.application_id}/${img}.png`;
+                                } else {
+                                    this.activityImage = null;
+                                }
+                            }
+                        } catch (e) {}
+                    };
+                    fetchPresence();
+                    setInterval(fetchPresence, 3000);
+                }
+            }
+        }
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('musicPlayer', () => ({
+                playing: false,
+                currentTime: 0,
+                duration: 0,
+                progress: 0,
+                shuffle: false,
+                repeat: false,
+                liked: false,
+                albumCover: getComputedStyle(document.documentElement).getPropertyValue('--player-album').trim().replace(/^url\(["']?|["']?\)$/g, ''),
+                init() {
+                    audio.addEventListener('loadedmetadata', () => {
+                        this.duration = audio.duration;
+                    });
+                    audio.addEventListener('timeupdate', () => {
+                        this.currentTime = audio.currentTime;
+                        this.progress = (audio.currentTime / audio.duration) * 100 || 0;
+                    });
+                    audio.addEventListener('play', () => { this.playing = true; });
+                    audio.addEventListener('pause', () => { this.playing = false; });
+                    audio.addEventListener('ended', () => {
+                        if (this.repeat) {
+                            audio.currentTime = 0;
+                            audio.play();
+                        } else {
+                            this.playing = false;
+                        }
+                    });
+                    if (audio.readyState >= 1) {
+                        this.duration = audio.duration;
+                    }
+                },
+                toggle() {
+                    if (audio.paused) {
+                        audio.play();
+                    } else {
+                        audio.pause();
+                    }
+                },
+                prev() {
+                    audio.currentTime = 0;
+                    if (audio.paused) audio.play();
+                },
+                next() {
+                    audio.currentTime = 0;
+                    if (audio.paused) audio.play();
+                },
+                seek(event) {
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    const fraction = (event.clientX - rect.left) / rect.width;
+                    if (isFinite(audio.duration)) {
+                        audio.currentTime = fraction * audio.duration;
+                    }
+                },
+                formatTime(seconds) {
+                    if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
+                    const m = Math.floor(seconds / 60);
+                    const s = Math.floor(seconds % 60);
+                    return m + ':' + (s < 10 ? '0' : '') + s;
+                }
+            }));
+        });
+    </script>
+</body>
+</html>
