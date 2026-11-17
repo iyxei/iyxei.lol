@@ -1,998 +1,985 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:title" content="</$">
-    <meta property="og:description" content="all for ransxm.">
-    <meta property="og:image" content="https://media.discordapp.net/attachments/1413865012367327302/1422122867369181194/rarararansom.jpg?ex=6a5bd3e1&is=6a5a8261&hm=c1452df93322515a564b05dad23ef31f1a0232f8ccb2f95d423305ee9a3c7cf5&=&format=webp&width=637&height=362">
-    <meta name="theme-color" content="#000000">
-    <meta name="twitter:card" content="summary_large_image">
-    <title>@shoheiden</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700;900&display=swap');
-
-        :root {
-            --default-bg: url('https://i.pinimg.com/736x/bf/a3/7f/bfa37fa5da8c65e527b9112c7666f08a.jpg');
-            --player-album: url('https://i.pinimg.com/1200x/2d/91/54/2d915473b4ff950adb42159db370fe66.jpg');
-            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-
-        * { box-sizing: border-box; }
-
-        body {
-            background-color: #050505;
-            margin: 0;
-            height: 100vh;
-            overflow: hidden;
-            font-family: 'Inter', sans-serif;
-            color: white;
-        }
-
-        html, body, body *, button, a { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><polygon points='16,2 20.4,11.6 31,13 23.2,20.2 25.2,30.6 16,25.4 6.8,30.6 8.8,20.2 1,13 11.6,11.6' fill='white' stroke='%23000' stroke-width='1.5' stroke-linejoin='round'/></svg>") 16 16, auto !important; }
-
-        /* ---------- Ambient background ---------- */
-        .ambient-bg {
-            position: absolute;
-            inset: -80px;
-            background-size: cover;
-            background-position: center;
-            background-image: var(--default-bg);
-            filter: blur(5px) brightness(0.6) saturate(1.1);
-            z-index: 0;
-            animation: drift 30s ease-in-out infinite alternate;
-        }
-        @keyframes drift {
-            from { transform: scale(1) translate(0, 0); }
-            to   { transform: scale(1.15) translate(-2%, 2%); }
-        }
-
-        .grain {
-            position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: .06;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-            animation: grainShift .6s steps(3) infinite;
-        }
-        @keyframes grainShift {
-            0% { transform: translate(0,0); } 33% { transform: translate(-3%,2%); } 66% { transform: translate(2%,-3%); } 100% { transform: translate(0,0); }
-        }
-
-        /* ---------- Intro / ASCII ---------- */
-        .entry-screen {
-            position: absolute;
-            inset: 0;
-            background: #050505;
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            clip-path: circle(150% at 50% 50%);
-            transition: clip-path 1.4s cubic-bezier(0.7, 0, 0.2, 1) .15s;
-        }
-        .entry-screen.hidden-smooth { clip-path: circle(0% at 50% 50%); pointer-events: none; }
-
-        .entry-screen::before {
-            content: ''; position: absolute; inset: 0; pointer-events: none;
-            background: repeating-linear-gradient(to bottom, rgba(255,255,255,.035) 0 1px, transparent 1px 3px);
-        }
-        .entry-screen::after {
-            content: ''; position: absolute; left: 0; right: 0; height: 120px; top: -120px; pointer-events: none;
-            background: linear-gradient(to bottom, transparent, rgba(255,255,255,.06), transparent);
-            animation: scan 5s linear infinite;
-        }
-        @keyframes scan { to { transform: translateY(calc(100vh + 240px)); } }
-
-        #ascii {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: clamp(4.5px, 1.75vw, 15px);
-            line-height: 1.05;
-            letter-spacing: 0;
-            white-space: pre;
-            margin: 0;
-            color: #f2f2f2;
-            position: relative;
-            z-index: 2;
-            text-shadow: 0 0 12px rgba(255,255,255,.25);
-        }
-        #ascii .ln {
-            display: block;
-            clip-path: inset(0 100% 0 0);
-            opacity: 0;
-            animation: lineIn .7s var(--ease-out) forwards;
-            animation-delay: calc(var(--i) * 110ms + .3s);
-        }
-        @keyframes lineIn {
-            0%   { clip-path: inset(0 100% 0 0); opacity: 0; filter: blur(6px); transform: translateX(-12px); }
-            40%  { opacity: 1; }
-            100% { clip-path: inset(0 0 0 0); opacity: 1; filter: blur(0); transform: translateX(0); }
-        }
-        #ascii.ready .ln { animation: none; clip-path: none; opacity: 1; }
-        #ascii.ready.glitch .ln:nth-child(3n+1) { animation: glitchA .28s steps(2) 1; }
-        #ascii.ready.glitch .ln:nth-child(3n+2) { animation: glitchB .28s steps(2) 1; }
-        @keyframes glitchA {
-            0% { transform: translateX(0); } 30% { transform: translateX(-6px); text-shadow: 3px 0 #f23f43, -3px 0 #3fa0f2; }
-            60% { transform: translateX(5px); } 100% { transform: translateX(0); }
-        }
-        @keyframes glitchB {
-            0% { transform: translateX(0); } 40% { transform: translateX(7px); text-shadow: -3px 0 #f23f43, 3px 0 #3fa0f2; }
-            100% { transform: translateX(0); }
-        }
-
-        .intro-line {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            letter-spacing: .25em;
-            color: rgba(255,255,255,.5);
-            margin-top: 28px;
-            min-height: 18px;
-            position: relative; z-index: 2;
-        }
-        .intro-line::after {
-            content: ''; display: inline-block; width: 8px; height: 14px; margin-left: 6px;
-            background: rgba(255,255,255,.7); vertical-align: -2px;
-            animation: blink 1s steps(1) infinite;
-        }
-        @keyframes blink { 50% { opacity: 0; } }
-
-        .enter-btn {
-            font-family: 'JetBrains Mono', monospace;
-            text-transform: uppercase;
-            letter-spacing: 0.5em;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.7);
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-            cursor: pointer;
-            padding: 14px 64px 14px 70px;
-            margin-top: 26px;
-            position: relative;
-            z-index: 2;
-            overflow: hidden;
-            opacity: 0;
-            transform: translateY(14px);
-            transition: color .5s, border-color .5s, letter-spacing .6s var(--ease-out);
-        }
-        .enter-btn.show { animation: btnIn .9s var(--ease-out) forwards; }
-        @keyframes btnIn { to { opacity: 1; transform: translateY(0); } }
-        .enter-btn::before {
-            content: ''; position: absolute; inset: 0; background: #fff;
-            transform: translateY(101%); transition: transform .5s var(--ease-out); z-index: -1;
-        }
-        .enter-btn:hover { color: #000; border-color: #fff; letter-spacing: .6em; }
-        .enter-btn:hover::before { transform: translateY(0); }
-
-        /* ---------- Main stage ---------- */
-        .main-content {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-        }
-        .tilt {
-            transform: perspective(1200px) translate3d(var(--tx, 0px), var(--ty, 0px), 0) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-            will-change: transform;
-            position: relative;
-            display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 24px;
-        }
-        .col-left { display: flex; flex-direction: column; align-items: center; }
-        .col-left .chroma-player { width: 420px; }
-
-        .profile-card {
-            position: relative;
-            width: 380px;
-            max-width: 92vw;
-            background: linear-gradient(160deg, rgba(255,255,255,.12), rgba(255,255,255,.03) 45%, rgba(255,255,255,.07));
-            backdrop-filter: blur(18px) saturate(1.7) brightness(1.05);
-            -webkit-backdrop-filter: blur(18px) saturate(1.7) brightness(1.05);
-            border: 1px solid rgba(255,255,255,.16);
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(255,255,255,.06), inset 0 0 30px rgba(255,255,255,.04), 0 25px 60px -15px rgba(0, 0, 0, 0.7);
-            opacity: 0;
-            clip-path: inset(50% 0 50% 0 round 24px);
-            filter: blur(14px);
-            transform: scale(.92);
-        }
-        .entered .profile-card {
-            animation: cardOpen 1.3s var(--ease-out) 1.2s forwards;
-        }
-        @keyframes cardOpen {
-            60% { filter: blur(0); }
-            100% { opacity: 1; clip-path: inset(0% 0 0% 0 round 24px); filter: none; transform: scale(1); }
-        }
-
-        /* rotating light border */
-        .profile-card::before {
-            content: ''; position: absolute; inset: 0; border-radius: 24px; padding: 1px; z-index: 6; pointer-events: none;
-            background: conic-gradient(from var(--angle), transparent 0 70%, rgba(255,255,255,.7) 85%, transparent 100%);
-            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-            -webkit-mask-composite: xor; mask-composite: exclude;
-            animation: spin 6s linear infinite;
-        }
-        @keyframes spin { to { --angle: 360deg; } }
-
-        /* glossy sheen that follows the cursor */
-        .profile-card::after {
-            content: ''; position: absolute; inset: 0; border-radius: 24px; z-index: 30; pointer-events: none;
-            background:
-                radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.26), rgba(255,255,255,0) 45%),
-                linear-gradient(125deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 70%, rgba(255,255,255,.08) 100%);
-        }
-
-        /* staggered reveal of inner pieces */
-        .rise { opacity: 0; transform: translateY(18px); filter: blur(6px); }
-        .entered .rise { animation: riseIn .8s var(--ease-out) forwards; animation-delay: calc(1.9s + var(--d, 0) * 120ms); }
-        @keyframes riseIn { to { opacity: 1; transform: translateY(0); filter: none; } }
-
-        .banner-container {
-            width: 100%;
-            height: 170px;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            z-index: 2;
-            overflow: hidden;
-        }
-        .banner-container::after {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.18) 50%, transparent 60%);
-            transform: translateX(-120%);
-            transition: transform 1s var(--ease-out);
-        }
-        .banner-container:hover::after { transform: translateX(120%); }
-        
-        .banner-container::before {
-            content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
-            background: linear-gradient(to bottom, rgba(0,0,0,.15) 0%, rgba(0,0,0,0) 40%, rgba(5,5,5,.55) 100%);
-        }
-        .banner-img { position: absolute; inset: 0; background-size: cover; background-position: center; }
-        .entered .banner-img { animation: bannerZoom 2.4s var(--ease-out) 1.2s both; }
-        @keyframes bannerZoom { from { transform: scale(1.35); } to { transform: scale(1); } }
-
-        .avatar-wrapper {
-            position: relative;
-            width: 104px;
-            height: 104px;
-            margin: -52px auto 16px;
-            z-index: 3;
-        }
-        .avatar {
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            border: 6px solid #0a0a0a;
-            background: #0a0a0a;
-            object-fit: cover;
-            position: relative; z-index: 3;
-            transition: transform .6s var(--ease-spring);
-        }
-        .avatar-wrapper:hover .avatar { transform: scale(1.08) rotate(-4deg); }
-        .avatar-wrapper::before {
-            content: ''; position: absolute; inset: -4px; border-radius: 50%; z-index: 2;
-            border: 1px solid rgba(255,255,255,.35);
-            animation: ping 3s ease-out infinite;
-        }
-        @keyframes ping { 0% { transform: scale(.95); opacity: .8; } 100% { transform: scale(1.35); opacity: 0; } }
-
-        .decoration {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 111px; height: 111px;
-            pointer-events: none; z-index: 4;
-        }
-
-        .status-wrapper {
-            position: absolute; bottom: 4px; right: 4px;
-            width: 24px; height: 24px;
-            background: #0a0a0a; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 5;
-        }
-        .status-dot { width: 16px; height: 16px; border-radius: 50%; transition: background .6s, box-shadow .6s; }
-        .online { background: #23a55a; box-shadow: 0 0 12px rgba(35, 165, 90, 0.6); animation: breathe 2.4s ease-in-out infinite; }
-        .idle { background: #f0b232; box-shadow: 0 0 12px rgba(240, 178, 50, 0.6); }
-        .dnd { background: #f23f43; box-shadow: 0 0 12px rgba(242, 63, 67, 0.6); }
-        .offline { background: #80848e; }
-        @keyframes breathe { 50% { transform: scale(.82); } }
-
-        .name-glow { background: linear-gradient(90deg, #fff 0%, #fff 40%, #8a8a8a 50%, #fff 60%, #fff 100%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        @keyframes nameShine { from { background-position: 150% 0; } to { background-position: -100% 0; } }
-        .entered .name-glow { animation: riseIn .8s var(--ease-out) forwards, nameShine 5s linear infinite; animation-delay: calc(1.9s + var(--d, 0) * 120ms), 0s; }
-
-        .custom-status-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-top: 12px;
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            max-width: 100%;
-            position: relative; z-index: 3;
-        }
-
-        .content-section {
-            background: rgba(255, 255, 255, 0.03);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 24px;
-            margin-top: 20px;
-            display: flex; flex-direction: column; gap: 20px;
-            position: relative; z-index: 3;
-        }
-
-        .section-header {
-            font-size: 11px; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 0.05em;
-            color: rgba(255, 255, 255, 0.4);
-            margin-bottom: 6px;
-        }
-
-        .divider { width: 100%; height: 1px; background: rgba(255,255,255,.08); transform-origin: left; transform: scaleX(0); }
-        .entered .divider { animation: lineGrow 1s var(--ease-out) 2.6s forwards; }
-        @keyframes lineGrow { to { transform: scaleX(1); } }
-
-        .activity-box { display: flex; align-items: flex-start; gap: 16px; }
-        .activity-art-wrapper { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
-        .activity-art { width: 100%; height: 100%; border-radius: 12px; object-fit: cover; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
-
-        .spotify-bar { width: 3px; background: #1DB954; border-radius: 2px; animation: pulseHeight 0.7s infinite alternate ease-in-out; }
-        @keyframes pulseHeight { 0% { height: 4px; } 100% { height: 16px; } }
-
-
-        /* ---------- Socials ---------- */
-        .socials { display: flex; justify-content: center; gap: 10px; padding-top: 2px; }
-        .soc {
-            position: relative; width: 38px; height: 38px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.2);
-            color: rgba(255,255,255,.75); font-size: 20px; text-decoration: none;
-            transition: transform .4s var(--ease-spring), color .25s, background .25s, box-shadow .25s;
-        }
-        .soc svg { width: 17px; height: 17px; fill: currentColor; }
-        .soc:hover { transform: translateY(-4px) scale(1.08); color: #fff; background: rgba(255,255,255,.14); box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 8px 18px rgba(0,0,0,.45); }
-        .soc:active { transform: scale(.92); }
-        .soc::after {
-            content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%;
-            transform: translate(-50%, 4px); opacity: 0; pointer-events: none; white-space: nowrap;
-            font: 600 10px 'JetBrains Mono', monospace; color: #fff;
-            background: rgba(0,0,0,.7); border: 1px solid rgba(255,255,255,.12); border-radius: 6px; padding: 4px 8px;
-            transition: opacity .2s, transform .3s var(--ease-out);
-        }
-        .soc:hover::after { opacity: 1; transform: translate(-50%, 0); }
-
-        /* ---------- Badges after username ---------- */
-        .badge-pill {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 3px 10px; border-radius: 999px;
-            background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.1);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
-        }
-        .badge-pill img { height: 18px; width: auto; object-fit: contain; transition: transform .35s var(--ease-spring), filter .3s; }
-        .badge-pill img:hover { transform: scale(1.25) rotate(-6deg); filter: drop-shadow(0 0 6px rgba(255,255,255,.5)); }
-
-        /* ---------- Mini terminal ---------- */
-        .term {
-            position: relative;
-            width: 420px; max-width: 92vw;
-            height: 440px;
-            display: flex; flex-direction: column;
-            border-radius: 16px; overflow: hidden;
-            background: linear-gradient(160deg, rgba(255,255,255,.1), rgba(255,255,255,.02) 50%, rgba(255,255,255,.05));
-            backdrop-filter: blur(18px) saturate(1.6);
-            -webkit-backdrop-filter: blur(18px) saturate(1.6);
-            border: 1px solid rgba(255,255,255,.16);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 25px 50px -15px rgba(0,0,0,.7);
-            font-family: 'JetBrains Mono', monospace;
-            opacity: 0; transform: translateX(-40px); filter: blur(10px);
-        }
-        .entered .term { animation: termIn 1s var(--ease-out) 2.2s forwards; }
-        @keyframes termIn { to { opacity: 1; transform: translateX(0); filter: none; } }
-        .term-bar { display: flex; align-items: center; gap: 7px; padding: 9px 14px; font-size: 10px; color: rgba(255,255,255,.45); background: rgba(0,0,0,.28); border-bottom: 1px solid rgba(255,255,255,.08); }
-        .term-bar i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-        .term-bar span { margin-left: auto; margin-right: auto; transform: translateX(-17px); }
-        .term-body { flex: 1; overflow-y: auto; padding: 12px 14px; font-size: 11px; line-height: 1.5; color: #d8d8d8; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.2) transparent; }
-        .tl { white-space: pre-wrap; word-break: break-word; min-height: 1.5em; }
-        .tl .g { color: #4ade80; } .tl .b { color: #60a5fa; } .tl .r { color: #f87171; } .tl .y { color: #facc15; } .tl .c { color: #22d3ee; } .tl .d { color: rgba(255,255,255,.4); }
-        .nf { display: flex; gap: 14px; align-items: flex-start; white-space: normal; margin: 4px 0; }
-        .nf pre { margin: 0; font: inherit; line-height: 1.15; }
-        .nf-art { color: #f1f1f1; }
-        .nf-info { line-height: 1.5 !important; white-space: pre; }
-        .term-input { display: none; align-items: center; }
-        .term-input.on { display: flex; }
-        .term-input input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: #fff; font: inherit; caret-color: #fff; padding: 0; }
-        @media (max-width: 920px) {
-            .tilt { flex-direction: column; }
-            .term { display: none; }
-            .col-left { order: 2; }
-            .col-left .chroma-player { width: 380px; }
-        }
-
-        /* ---------- Player ---------- */
-        .chroma-player {
-            width: 380px;
-            max-width: 92vw;
-            margin-top: 16px;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(160deg, rgba(255,255,255,.12), rgba(255,255,255,.03) 50%, rgba(255,255,255,.07));
-            backdrop-filter: blur(18px) saturate(1.7);
-            -webkit-backdrop-filter: blur(18px) saturate(1.7);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            padding: 16px;
-            display: flex; align-items: center; gap: 14px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(255,255,255,.05), 0 15px 30px rgba(0,0,0,0.5);
-            opacity: 0;
-            transform: translateY(60px) scale(.9);
-            transition: box-shadow .4s ease;
-        }
-        .entered .chroma-player { animation: playerIn 1s var(--ease-spring) 2.5s forwards; }
-        @keyframes playerIn { to { opacity: 1; transform: translateY(0) scale(1); } }
-        .chroma-player:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 25px 45px rgba(0,0,0,0.6); }
-        .chroma-player::after { content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: 24px;
-            background: radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.18), transparent 55%), linear-gradient(125deg, rgba(255,255,255,.14), transparent 35%); }
-
-        .album-art-left {
-            width: 64px; height: 64px;
-            border-radius: 12px;
-            background-size: cover; background-position: center;
-            flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            transition: border-radius .8s var(--ease-out), transform .8s var(--ease-out);
-        }
-        .chroma-player.is-playing .album-art-left { border-radius: 50%; animation: vinyl 8s linear infinite; }
-        @keyframes vinyl { to { transform: rotate(360deg); } }
-
-        .player-right { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-        .track-info-row { display: flex; flex-direction: column; }
-        .track-title { font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .track-artist { font-size: 13px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        .progress-area { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
-        .time-label { font-size: 10px; color: rgba(255,255,255,0.5); min-width: 30px; text-align: center; font-variant-numeric: tabular-nums; }
-        .progress-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; cursor: pointer; position: relative; transition: height .2s; }
-        .progress-bar:hover { height: 7px; }
-        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #e74c3c, #ff8a65); border-radius: 2px; position: relative; }
-        .progress-fill::after { content: ''; position: absolute; right: -4px; top: 50%; width: 9px; height: 9px; border-radius: 50%; background: #fff; transform: translateY(-50%) scale(0); transition: transform .25s var(--ease-spring); }
-        .progress-bar:hover .progress-fill::after { transform: translateY(-50%) scale(1); }
-
-        .controls-row { display: flex; align-items: center; justify-content: space-between; }
-        .control-btns { display: flex; align-items: center; gap: 14px; }
-        .ctrl-btn {
-            background: none; border: none; color: #fff; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            width: 30px; height: 30px; border-radius: 50%;
-            transition: transform .3s var(--ease-spring), background .2s, opacity .2s;
-            opacity: .7; font-size: 20px;
-        }
-        .ctrl-btn:hover { opacity: 1; background: rgba(255,255,255,.1); transform: scale(1.15); }
-        .ctrl-btn:active { transform: scale(.85); }
-        .ctrl-btn.play-btn { width: 36px; height: 36px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.1); font-size: 22px; }
-
-        .extra-btns { display: flex; gap: 12px; color: rgba(255,255,255,0.5); font-size: 16px; }
-        .extra-btns i { cursor: pointer; transition: color .2s, transform .4s var(--ease-spring); }
-        .extra-btns i:hover { color: #fff; }
-        .extra-btns i:active { transform: scale(.7); }
-        .extra-btns i.active { color: #e74c3c; animation: pop .45s var(--ease-spring); }
-        @keyframes pop { 0% { transform: scale(.6); } 60% { transform: scale(1.35); } 100% { transform: scale(1); } }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-        }
-    </style>
-</head>
-<body x-data="profileCard('984436577612759111')" :class="entered ? 'entered' : ''">
-
-    <div class="ambient-bg"></div>
-    <div class="grain"></div>
-
-    <div class="entry-screen" :class="entered ? 'hidden-smooth' : ''">
-<pre id="ascii">████    ████  ▄▄▓████████ ▄▀░▒ ███▓████▄▄    ▄▄▓████████ ████▄   ████
-▒▓▓▓    ▓▓▓▒ ▒▒▓▓▓▓▓▓▓▓▓▓ ░█▄▀ ▒▒▓▓▓▓▓▓▓▓▓▄ ▒▒▓▓▓▓▓▓▓▓▓▓ ▒▓▓▓▓▓▄ ▓▓▓▒
-░▒▒▒    ▒▒▒░ ░▒▒▒▀   ░▒▒▒ ▀▀▀▀ ░▒▒▒▀  ▀▒▒▒▒ ░▒▒▒▀   ░▒▒▒ ░▒▒▒▒▒▒▒▒▒▒░
- ░░░░░░░░░░   ░░░▄▄▄▄     ░     ░░░    ░░░░  ░░░▄▄▄▄      ░░░ ▀░░░░░ 
-▀▀▀▀▀▀▀▀▀▀▀▀ ░░░▒▒▒▓▓     ▒░░░ ▀▀▀▀    ▀▀▀▀ ░░░▒▒▒▓▓     ▀▀▀▀   ▀▀▀▀▀
-   ░       ░ ░   ▀▀▀▀     ▓▒▒▒ ░          ░ ░   ▀▀▀▀        ░       ░
-░░░▒    ░░░▒ ▒░░░▄   ░▒▒▒ █▓▓▓ ▒░░░▄  ▄░░░▒ ▒░░░▄   ░▒▒▒ ░░░▒    ░░░▒
-▒▒▒▓    ▒▒▒▓ ▓▒▒▒▒▒▒▒▒▒▒▒ ████ ▓▒▒▒▒▒▒▒▒▒▒▒ ▓▒▒▒▒▒▒▒▒▒▒▒ ▒▒▒▓    ▒▒▒▓
-▓███    ▓▓▓█  ▀▀▓▓▓▓▓▓███ ████ ███▓▓▓▓▓▓▀▀   ▀▀▓▓▓▓▓▓███ ▓███    ▓▓▓█</pre>
-        <div class="intro-line" id="introLine"></div>
-        <button class="enter-btn" id="enterBtn" @click="enter()">Enter</button>
-    </div>
-
-    <div class="main-content" x-show="entered" style="display: none;">
-        <div class="tilt" id="tilt">
-            <div class="col-left">
-            <div class="term" id="term">
-                <div class="term-bar"><i style="background:#f87171"></i><i style="background:#facc15"></i><i style="background:#4ade80"></i><span>iyxei@heiden: ~</span></div>
-                <div class="term-body" id="termBody">
-                    <label class="tl term-input" id="termInputRow"><span class="g">iyxei@heiden</span><span class="d">:</span><span class="b">~</span><span class="d">$&nbsp;</span><input id="termInput" type="text" autocomplete="off" spellcheck="false" autocapitalize="off"></label>
-                </div>
-            </div>
-            <div class="chroma-player" x-data="musicPlayer" :class="playing ? 'is-playing' : ''">
-                <div class="album-art-left" :style="'background-image: url(' + albumCover + ')'"></div>
-                <div class="player-right">
-                    <div class="track-info-row">
-                        <span class="track-title">HEAVEN AND BACK</span>
-                        <span class="track-artist">Chase Atlantic</span>
-                    </div>
-                    <div class="progress-area">
-                        <span class="time-label" x-text="formatTime(currentTime)"></span>
-                        <div class="progress-bar" @click="seek">
-                            <div class="progress-fill" :style="'width:' + progress + '%'"></div>
-                        </div>
-                        <span class="time-label" x-text="formatTime(duration)"></span>
-                    </div>
-                    <div class="controls-row">
-                        <div class="control-btns">
-                            <button class="ctrl-btn" @click="prev"><i class='bx bx-skip-previous'></i></button>
-                            <button class="ctrl-btn play-btn" @click="toggle">
-                                <i class='bx' :class="playing ? 'bx-pause' : 'bx-play'"></i>
-                            </button>
-                            <button class="ctrl-btn" @click="next"><i class='bx bx-skip-next'></i></button>
-                        </div>
-                        <div class="extra-btns">
-                            <i class='bx bx-shuffle' :class="{ 'active': shuffle }" @click="shuffle = !shuffle"></i>
-                            <i class='bx bx-repeat' :class="{ 'active': repeat }" @click="repeat = !repeat"></i>
-                            <i class='bx bx-heart' :class="{ 'active': liked }" @click="liked = !liked"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            </div>
-            <div class="profile-card">
-                <div class="banner-container rise" style="--d:0"><div class="banner-img" :style="'background-image: url(' + banner + ')'"></div></div>
-                <div class="px-6 pb-2 text-center relative z-20">
-                    <div class="avatar-wrapper rise" style="--d:1">
-                        <img :src="avatar" class="avatar" alt="Avatar">
-                        <template x-if="decoration">
-                            <img :src="decoration" class="decoration" alt="Decoration">
-                        </template>
-                        <div class="status-wrapper">
-                            <div class="status-dot" :class="status"></div>
-                        </div>
-                    </div>
-                    <h1 class="rise name-glow text-2xl font-black tracking-tight" style="--d:2" x-text="name"></h1>
-                    <div class="rise flex flex-wrap items-center justify-center gap-2 mt-1.5" style="--d:3">
-                        <p class="text-xs font-semibold text-white/40 tracking-[0.2em] uppercase" x-text="'@' + username"></p>
-                        <div class="badge-pill">
-                            <img src="https://file.garden/aPNQD5oGSn0LJI5K/Taeyeon-removebg-preview.png" alt="Taeyeon">
-                            <img src="https://file.garden/aPNQD5oGSn0LJI5K/ransxm.png" alt="ransxm">
-                        </div>
-                    </div>
-                    <div class="rise" style="--d:4">
-                        <template x-if="customStatus">
-                            <div class="custom-status-card">
-                                <template x-if="customStatusEmoji">
-                                    <span x-text="customStatusEmoji" class="text-sm"></span>
-                                </template>
-                                <span class="text-xs font-medium text-white/80" x-text="customStatus"></span>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-                <div class="content-section">
-                    <div class="text-left rise" style="--d:5">
-                        <h3 class="section-header">About Me</h3>
-                        <p class="text-[13px] text-white/70 leading-relaxed font-medium">always ransxm.</p>
-                    </div>
-                    <div class="text-left rise" style="--d:6">
-                        <h3 class="section-header">Discord Member Since</h3>
-                        <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 rounded-full bg-white/20"></div>
-                            <p class="text-[13px] text-white/90 font-medium" x-text="memberSince"></p>
-                        </div>
-                    </div>
-                    <div class="divider"></div>
-                    <div class="rise" style="--d:7">
-                        <template x-if="isSpotify">
-                            <div class="activity-box text-left">
-                                <div class="activity-art-wrapper">
-                                    <img :src="spotify.album_art_url" class="activity-art">
-                                </div>
-                                <div class="overflow-hidden flex-1 py-1">
-                                    <div class="flex items-center gap-2 mb-1.5">
-                                        <span class="text-[10px] text-[#1DB954] font-black uppercase tracking-widest">Listening to Spotify</span>
-                                        <div class="flex items-end gap-[2px] h-[16px] ml-auto">
-                                            <div class="spotify-bar" style="animation-delay: 0s"></div>
-                                            <div class="spotify-bar" style="animation-delay: 0.2s"></div>
-                                            <div class="spotify-bar" style="animation-delay: 0.4s"></div>
-                                        </div>
-                                    </div>
-                                    <p class="text-white text-[13px] font-bold truncate leading-tight hover:underline cursor-pointer" x-text="spotify.song"></p>
-                                    <p class="text-white/60 text-[11px] truncate mt-0.5" x-text="'by ' + spotify.artist"></p>
-                                    <p class="text-white/40 text-[11px] truncate mt-0.5" x-text="'on ' + spotify.album"></p>
-                                </div>
-                            </div>
-                        </template>
-                        <template x-if="!isSpotify && hasActivity">
-                            <div class="activity-box text-left">
-                                <div class="activity-art-wrapper flex items-center justify-center bg-white/5 rounded-xl border border-white/10">
-                                    <template x-if="activityImage">
-                                        <img :src="activityImage" class="activity-art">
-                                    </template>
-                                    <template x-if="!activityImage">
-                                        <svg class="w-8 h-8 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    </template>
-                                </div>
-                                <div class="overflow-hidden flex-1 py-1">
-                                    <span class="text-[10px] text-indigo-400 font-black uppercase tracking-widest mb-1.5 block" x-text="activity.type === 0 ? 'Playing a game' : 'Doing an activity'"></span>
-                                    <p class="text-white text-[13px] font-bold truncate leading-tight" x-text="activity.name"></p>
-                                    <p class="text-white/60 text-[11px] truncate mt-0.5" x-text="activity.details || ''"></p>
-                                    <p class="text-white/40 text-[11px] truncate mt-0.5" x-text="activity.state || ''"></p>
-                                </div>
-                            </div>
-                        </template>
-                        <template x-if="!isSpotify && !hasActivity">
-                            <div class="text-center py-2">
-                                <p class="text-[11px] text-white/30 font-medium uppercase tracking-wider font-mono">No active presence detected</p>
-                            </div>
-                        </template>
-                    </div>
-                    <div class="socials rise" style="--d:8">
-                        <a class="soc" href="https://instagram.com/deobfx" target="_blank" rel="noopener" data-tip="deobfx" aria-label="Instagram"><i class='bx bxl-instagram'></i></a>
-                        <a class="soc" href="https://x.com/htrb1337" target="_blank" rel="noopener" data-tip="htrb1337" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-                        <a class="soc" href="#" x-data="{ c: false }" :data-tip="c ? 'copied!' : 'deathcuits'" @click.prevent="navigator.clipboard && navigator.clipboard.writeText('deathcuits'); c = true; setTimeout(() => c = false, 1500)" aria-label="Discord"><i class='bx bxl-discord-alt'></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const audio = new Audio('https://file.garden/aTZTACJbkUlB55j2/Chase%20Atlantic%20-%20HEAVEN%20AND%20BACK.mp3');
-        audio.loop = false;
-
-        /* ---------- ASCII intro sequence ---------- */
-        (function () {
-            const pre = document.getElementById('ascii');
-            const lines = pre.textContent.split('\n');
-            pre.innerHTML = lines.map((l, i) => '<span class="ln" style="--i:' + i + '">' + (l || ' ') + '</span>').join('');
-
-            const total = lines.length * 110 + 900;
-            const msg = "larp me, it's free.";
-            const el = document.getElementById('introLine');
-            setTimeout(() => {
-                let n = 0;
-                const t = setInterval(() => {
-                    el.textContent = msg.slice(0, ++n);
-                    if (n >= msg.length) {
-                        clearInterval(t);
-                        document.getElementById('enterBtn').classList.add('show');
-                    }
-                }, 55);
-            }, total);
-
-            // periodic glitch once the lines have landed
-            setTimeout(() => {
-                pre.classList.add('ready');
-                setInterval(() => {
-                    pre.classList.remove('glitch');
-                    void pre.offsetWidth;
-                    pre.classList.add('glitch');
-                }, 4200);
-            }, total + 1500);
-        })();
-
-        /* ---------- Cursor-following card (smoothed move + tilt + gloss) ---------- */
-        (function () {
-            const tilt = document.getElementById('tilt');
-            const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-            let tx = 0, ty = 0;   // target, -1..1
-            let cx = 0, cy = 0;   // current, smoothed
-
-            function aim(e) {
-                tx = Math.max(-1, Math.min(1, (e.clientX / innerWidth - 0.5) * 2));
-                ty = Math.max(-1, Math.min(1, (e.clientY / innerHeight - 0.5) * 2));
-            }
-            function rest() { tx = 0; ty = 0; }
-
-            addEventListener('pointermove', aim, { passive: true });
-            addEventListener('pointerdown', aim, { passive: true });
-            document.documentElement.addEventListener('pointerleave', rest);
-            addEventListener('blur', rest);
-            addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') rest(); });
-
-            function frame() {
-                const dx = tx - cx, dy = ty - cy;
-                if (Math.abs(dx) > 0.0004 || Math.abs(dy) > 0.0004) {
-                    cx += dx * 0.085;
-                    cy += dy * 0.085;
-                    const k = reduce ? 0 : 1;
-                    const moveX = Math.min(40, innerWidth * 0.05);
-                    const moveY = Math.min(28, innerHeight * 0.04);
-                    tilt.style.setProperty('--tx', (cx * moveX * k).toFixed(2) + 'px');
-                    tilt.style.setProperty('--ty', (cy * moveY * k).toFixed(2) + 'px');
-                    tilt.style.setProperty('--ry', (cx * 11 * k).toFixed(2) + 'deg');
-                    tilt.style.setProperty('--rx', (-cy * 9 * k).toFixed(2) + 'deg');
-                    tilt.style.setProperty('--mx', (50 + cx * 45).toFixed(1) + '%');
-                    tilt.style.setProperty('--my', (50 + cy * 45).toFixed(1) + '%');
-                }
-                requestAnimationFrame(frame);
-            }
-            requestAnimationFrame(frame);
-        })();
-
-        /* ---------- Mini terminal (all output is canned; nothing touches the network) ---------- */
-        (function () {
-            const body = document.getElementById('termBody');
-            const row = document.getElementById('termInputRow');
-            const inp = document.getElementById('termInput');
-            const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-            const PROMPT = '<span class="g">iyxei@heiden</span><span class="d">:</span><span class="b">~</span><span class="d">$</span> ';
-            const ART = [
-'⠀⠀⣀⣤⣀⣀⠀⠀⠀⠀⣀⠄⠀⢀⣀⣤⠄⠀⠀⠀⠀',
-'⣰⠿⣿⣿⣿⣿⣿⣿⣿⡿⠁⣴⣿⡟⠁⠀⠀⠀⠀⠀⠀',
-'⠁⠀⠀⠈⠉⠉⢉⣾⣿⠁⢰⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀',
-'⠀⠀⠀⠀⠀⠀⣾⣿⣿⠀⢸⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀',
-'⠀⠀⠀⠀⠀⠀⣿⣿⣿⠀⢸⣿⣿⣧⠀⠀⠀⠀⠀⠀⠀',
-'⠀⠀⢀⣤⣤⣤⣿⣿⣿⠀⠈⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀',
-'⠀⠀⠉⠉⠙⠿⣿⣿⣿⡇⠀⣿⣿⡿⠀⠀⠀⠀⠀⠀⠀',
-'⠀⠀⠀⢀⣤⣤⣿⣿⣿⠃⢠⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀',
-'⠀⠀⠀⠀⠉⠛⣿⣿⡿⠀⣼⡿⠃⠀⠀⠀⠀⠀⠀⠀⠀',
-'⠀⠀⠀⠀⠀⠀⣼⣿⢁⡼⠏⢀⣀⣀⣀⠀⠀⠀⠀⠀⠀',
-'⠀⠀⠀⠀⠀⣰⣿⣵⣿⣷⣿⣿⣿⣿⣿⣿⣷⣦⣄⡠⠄',
-'⠀⠀⠀⣠⠾⠛⠋⠉⠉⠉⠉⠉⠉⠙⠛⢿⣿⣿⠋⠀⠀',
-'⠀⠀⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀'
-            ];
-            const INFO = [
-'<span class="g">iyxei</span>@<span class="g">heiden</span>',
-'-------------',
-'<span class="b">OS</span>: Arch Linux x86_64',
-'<span class="b">Host</span>: Iphone 16 Pro Max',
-'<span class="b">Kernel</span>: 6.9.7-heiden',
-'<span class="b">Uptime</span>: 1337 days, 4 hours',
-'<span class="b">Shell</span>: zsh 5.9',
-'<span class="b">WM</span>: i3',
-'<span class="b">Terminal</span>: kitty terminal &gt;.&lt;',
-'<span class="b">CPU</span>: Ryzen 9 7950X',
-'<span class="b">Memory</span>: 6969MiB / 32768MiB',
-'',
-'<span style="color:#f87171">███</span><span style="color:#facc15">███</span><span style="color:#4ade80">███</span><span style="color:#22d3ee">███</span><span style="color:#60a5fa">███</span><span style="color:#c084fc">███</span>'
-            ].join('\n');
-
-            let busy = false, started = false;
-            const history = []; let hi = 0;
-
-            function line(html) {
-                const d = document.createElement('div');
-                d.className = 'tl';
-                d.innerHTML = html;
-                body.insertBefore(d, row);
-                body.scrollTop = body.scrollHeight;
-                return d;
-            }
-            async function typeCmd(cmd, prompt) {
-                const d = line(prompt || PROMPT);
-                const t = document.createElement('span');
-                d.appendChild(t);
-                for (const ch of cmd) { t.textContent += ch; await sleep(30 + Math.random() * 45); }
-                await sleep(260);
-            }
-            function neofetch() {
-                const d = line('');
-                d.className = 'tl nf';
-                d.innerHTML = '<pre class="nf-art">' + ART.join('\n') + '</pre><pre class="nf-info">' + INFO + '</pre>';
-                body.scrollTop = body.scrollHeight;
-            }
-            async function bar(label) {
-                const d = line('');
-                for (let i = 0; i <= 20; i++) {
-                    d.innerHTML = '<span class="c">' + label + '</span> [' + '█'.repeat(i) + '<span class="d">' + '░'.repeat(20 - i) + '</span>] ' + (i * 5) + '%';
-                    await sleep(45);
-                }
-            }
-            async function exploitDemo() {
-                const steps = [
-                    [500, '<span class="b">[*]</span> target: https://senate.gov.ph'],
-                    [600, '<span class="b">[*]</span> fingerprinting service...'],
-                    [500, '<span class="g">[+]</span> server: heiden-httpd/2.4.1 (TLS 1.3)'],
-                    [600, '<span class="b">[*]</span> matching known issues...'],
-                    [700, '<span class="r">[!]</span> <span class="y">CVE-2026-31337</span>'],
-                    [250, '    unsafe deserialization in /api/session'],
-                    [250, '    unauthenticated  |  CVSS 9.8  |  RCE']
-                ];
-                for (const [ms, html] of steps) { await sleep(ms); line(html); }
-                await sleep(500); await bar('stage 1/3 payload  ');
-                await bar('stage 2/3 handshake ');
-                await bar('stage 3/3 trigger   ');
-                await sleep(500);
-                line('<span class="g">[+]</span> code execution achieved');
-                await sleep(500);
-                line('<span class="g">[+]</span> shell opened on localhost:8080');
-                await sleep(500);
-                await typeCmd('id', '<span class="r">heiden@localhost</span><span class="d">:</span><span class="b">~</span><span class="r">#</span> ');
-                line('uid=0(root) gid=0(root) groups=0(root)');
-                await sleep(400);
-                line('<span class="d">session closed. type</span> help <span class="d">for commands.</span>');
-            }
-            async function runHeiden() {
-                neofetch();
-                await typeCmd('python heiden.py');
-                line('<span class="d">heiden.py v1.3.37 loaded</span>');
-                await sleep(900);
-                await exploitDemo();
-            }
-
-            const COMMANDS = {
-                help: () => line('commands: <span class="g">help affiliations neofetch whoami ls python heiden.py clear</span>'),
-                affiliations: () => ['dxpeboys', 'narnia', 'ransxm', 'heavxn'].forEach(n => line('<span class="g">[$]</span> ' + n)),
-                neofetch: () => neofetch(),
-                whoami: () => line('iyxei'),
-                ls: () => line('<span class="b">heiden.py</span>  README.md'),
-                exit: () => line('nice try.'),
-                clear: () => { [...body.querySelectorAll('.tl:not(.term-input)')].forEach(n => n.remove()); }
-            };
-
-            async function exec(raw) {
-                const cmd = raw.trim();
-                const echo = line(PROMPT);
-                const t = document.createElement('span'); t.textContent = raw; echo.appendChild(t);
-                if (!cmd) return;
-                history.push(cmd); hi = history.length;
-                if (cmd === 'python heiden.py' || cmd === 'python3 heiden.py') { await runHeiden(); return; }
-                if (COMMANDS[cmd]) { COMMANDS[cmd](); return; }
-                line('zsh: command not found: ' + cmd.replace(/</g, '&lt;'));
-            }
-
-            function setBusy(v) {
-                busy = v;
-                row.classList.toggle('on', !v);
-                if (!v) { body.scrollTop = body.scrollHeight; inp.focus({ preventScroll: true }); }
-            }
-
-            inp.addEventListener('keydown', async (e) => {
-                if (e.key === 'Enter') {
-                    const v = inp.value; inp.value = '';
-                    if (v.trim() === 'clear') { COMMANDS.clear(); return; }
-                    setBusy(true); await exec(v); setBusy(false);
-                } else if (e.key === 'ArrowUp' && history.length) {
-                    hi = Math.max(0, hi - 1); inp.value = history[hi]; e.preventDefault();
-                } else if (e.key === 'ArrowDown') {
-                    hi = Math.min(history.length, hi + 1); inp.value = history[hi] || ''; e.preventDefault();
-                }
-            });
-            body.addEventListener('click', () => { if (!busy) inp.focus({ preventScroll: true }); });
-
-            window.startTerminal = async function () {
-                if (started) return; started = true;
-                setBusy(true);
-                await runHeiden();
-                setBusy(false);
-            };
-        })();
-
-        function profileCard(uid) {
-            return {
-                entered: false,
-                name: 'Loading...',
-                username: 'loading',
-                avatar: 'https://cdn.discordapp.com/embed/avatars/0.png',
-                banner: 'https://i.pinimg.com/736x/a8/58/47/a85847abccfa9eb0f3610318759aa0ff.jpg',
-                decoration: null,
-                status: 'offline',
-                memberSince: 'Loading date...',
-                customStatus: '',
-                customStatusEmoji: '',
-                isSpotify: false,
-                spotify: {},
-                hasActivity: false,
-                activity: {},
-                activityImage: null,
-
-                enter() {
-                    this.entered = true;
-                    audio.play().catch(() => {});
-                    setTimeout(() => window.startTerminal && window.startTerminal(), 3000);
-                },
-
-                calculateMemberSince() {
-                    try {
-                        const timestamp = Number((BigInt(uid) >> 22n) + 1420070400000n);
-                        const date = new Date(timestamp);
-                        this.memberSince = date.toLocaleDateString('en-US', {
-                            month: 'short', day: '2-digit', year: 'numeric'
-                        });
-                    } catch (e) {
-                        this.memberSince = 'Unknown Date';
-                    }
-                },
-
-                async init() {
-                    this.calculateMemberSince();
-                    const fetchPresence = async () => {
-                        try {
-                            const r = await fetch(`https://api.lanyard.rest/v1/users/${uid}`);
-                            const { data } = await r.json();
-                            const user = data.discord_user;
-                            this.name = user.global_name || user.username;
-                            this.username = user.username;
-                            this.status = data.discord_status;
-                            this.avatar = user.avatar
-                                ? `https://cdn.discordapp.com/avatars/${uid}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256`
-                                : `https://cdn.discordapp.com/embed/avatars/${Number((BigInt(uid) >> 22n) % 6n)}.png`;
-                            const decAsset = user.avatar_decoration_data?.asset;
-                            this.decoration = decAsset ? `https://cdn.discordapp.com/avatar-decoration-presets/${decAsset}.png` : null;
-                            const customAct = data.activities.find(a => a.type === 4);
-                            this.customStatus = customAct ? customAct.state || '' : '';
-                            this.customStatusEmoji = customAct ? customAct.emoji?.name || '' : '';
-                            this.isSpotify = data.listening_to_spotify;
-                            if (this.isSpotify) this.spotify = data.spotify;
-                            const act = data.activities.find(a => a.type !== 4 && a.id !== "spotify:1");
-                            this.hasActivity = !!act;
-                            if (act) {
-                                this.activity = act;
-                                if (act.assets && act.assets.large_image) {
-                                    let img = act.assets.large_image;
-                                    this.activityImage = img.startsWith("mp:external/")
-                                        ? `https://media.discordapp.net/external/${img.replace("mp:external/", "")}`
-                                        : `https://cdn.discordapp.com/app-assets/${act.application_id}/${img}.png`;
-                                } else {
-                                    this.activityImage = null;
-                                }
-                            }
-                        } catch (e) {}
-                    };
-                    fetchPresence();
-                    setInterval(fetchPresence, 3000);
-                }
-            }
-        }
-
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('musicPlayer', () => ({
-                playing: false,
-                currentTime: 0,
-                duration: 0,
-                progress: 0,
-                shuffle: false,
-                repeat: false,
-                liked: false,
-                albumCover: getComputedStyle(document.documentElement).getPropertyValue('--player-album').trim().replace(/^url\(["']?|["']?\)$/g, ''),
-                init() {
-                    audio.addEventListener('loadedmetadata', () => { this.duration = audio.duration; });
-                    audio.addEventListener('timeupdate', () => {
-                        this.currentTime = audio.currentTime;
-                        this.progress = (audio.currentTime / audio.duration) * 100 || 0;
-                    });
-                    audio.addEventListener('play', () => { this.playing = true; });
-                    audio.addEventListener('pause', () => { this.playing = false; });
-                    audio.addEventListener('ended', () => {
-                        if (this.repeat) {
-                            audio.currentTime = 0;
-                            audio.play();
-                        } else {
-                            this.playing = false;
-                        }
-                    });
-                    if (audio.readyState >= 1) this.duration = audio.duration;
-                },
-                toggle() { audio.paused ? audio.play() : audio.pause(); },
-                prev() { audio.currentTime = 0; if (audio.paused) audio.play(); },
-                next() { audio.currentTime = 0; if (audio.paused) audio.play(); },
-                seek(event) {
-                    const rect = event.currentTarget.getBoundingClientRect();
-                    const fraction = (event.clientX - rect.left) / rect.width;
-                    if (isFinite(audio.duration)) audio.currentTime = fraction * audio.duration;
-                },
-                formatTime(seconds) {
-                    if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
-                    const m = Math.floor(seconds / 60);
-                    const s = Math.floor(seconds % 60);
-                    return m + ':' + (s < 10 ? '0' : '') + s;
-                }
-            }));
-        });
-    </script>
-</body>
-</html>
+<!DOCTYPE html> <!-- @deathcuits -->
+<html lang="en"> <!-- @deathcuits -->
+<head> <!-- @deathcuits -->
+    <meta charset="UTF-8"> <!-- @deathcuits -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- @deathcuits -->
+    <meta property="og:title" content="</$"> <!-- @deathcuits -->
+    <meta property="og:description" content="all for ransxm."> <!-- @deathcuits -->
+    <meta property="og:image" content="https://media.discordapp.net/attachments/1413865012367327302/1422122867369181194/rarararansom.jpg?ex=6a5bd3e1&is=6a5a8261&hm=c1452df93322515a564b05dad23ef31f1a0232f8ccb2f95d423305ee9a3c7cf5&=&format=webp&width=637&height=362"> <!-- @deathcuits -->
+    <meta name="theme-color" content="#000000"> <!-- @deathcuits -->
+    <meta name="twitter:card" content="summary_large_image"> <!-- @deathcuits -->
+    <title>@shoheiden</title> <!-- @deathcuits -->
+    <script src="https://cdn.tailwindcss.com"></script> <!-- @deathcuits -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> <!-- @deathcuits -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> <!-- @deathcuits -->
+    <style> /* @deathcuits */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700;900&display=swap'); /* @deathcuits */
+/* @deathcuits */
+        :root { /* @deathcuits */
+            --default-bg: url('https://i.pinimg.com/736x/bf/a3/7f/bfa37fa5da8c65e527b9112c7666f08a.jpg'); /* @deathcuits */
+            --player-album: url('https://i.pinimg.com/1200x/2d/91/54/2d915473b4ff950adb42159db370fe66.jpg'); /* @deathcuits */
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* @deathcuits */
+            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* @deathcuits */
+        } /* @deathcuits */
+/* @deathcuits */
+        @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; } /* @deathcuits */
+/* @deathcuits */
+        * { box-sizing: border-box; } /* @deathcuits */
+/* @deathcuits */
+        body { /* @deathcuits */
+            background-color: #050505; /* @deathcuits */
+            margin: 0; /* @deathcuits */
+            height: 100vh; /* @deathcuits */
+            overflow: hidden; /* @deathcuits */
+            font-family: 'Inter', sans-serif; /* @deathcuits */
+            color: white; /* @deathcuits */
+        } /* @deathcuits */
+/* @deathcuits */
+        html, body, body *, button, a { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><polygon points='16,2 20.4,11.6 31,13 23.2,20.2 25.2,30.6 16,25.4 6.8,30.6 8.8,20.2 1,13 11.6,11.6' fill='white' stroke='%23000' stroke-width='1.5' stroke-linejoin='round'/></svg>") 16 16, auto !important; } /* @deathcuits */
+/* @deathcuits */
+        .ambient-bg { /* @deathcuits */
+            position: absolute; /* @deathcuits */
+            inset: -80px; /* @deathcuits */
+            background-size: cover; /* @deathcuits */
+            background-position: center; /* @deathcuits */
+            background-image: var(--default-bg); /* @deathcuits */
+            filter: blur(5px) brightness(0.6) saturate(1.1); /* @deathcuits */
+            z-index: 0; /* @deathcuits */
+            animation: drift 30s ease-in-out infinite alternate; /* @deathcuits */
+        } /* @deathcuits */
+        @keyframes drift { /* @deathcuits */
+            from { transform: scale(1) translate(0, 0); } /* @deathcuits */
+            to   { transform: scale(1.15) translate(-2%, 2%); } /* @deathcuits */
+        } /* @deathcuits */
+/* @deathcuits */
+        .grain { /* @deathcuits */
+            position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: .06; /* @deathcuits */
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); /* @deathcuits */
+            animation: grainShift .6s steps(3) infinite; /* @deathcuits */
+        } /* @deathcuits */
+        @keyframes grainShift { /* @deathcuits */
+            0% { transform: translate(0,0); } 33% { transform: translate(-3%,2%); } 66% { transform: translate(2%,-3%); } 100% { transform: translate(0,0); } /* @deathcuits */
+        } /* @deathcuits */
+/* @deathcuits */
+        .entry-screen { /* @deathcuits */
+            position: absolute; /* @deathcuits */
+            inset: 0; /* @deathcuits */
+            background: #050505; /* @deathcuits */
+            z-index: 50; /* @deathcuits */
+            display: flex; /* @deathcuits */
+            align-items: center; /* @deathcuits */
+            justify-content: center; /* @deathcuits */
+            flex-direction: column; /* @deathcuits */
+            clip-path: circle(150% at 50% 50%); /* @deathcuits */
+            transition: clip-path 1.4s cubic-bezier(0.7, 0, 0.2, 1) .15s; /* @deathcuits */
+        } /* @deathcuits */
+        .entry-screen.hidden-smooth { clip-path: circle(0% at 50% 50%); pointer-events: none; } /* @deathcuits */
+/* @deathcuits */
+        .entry-screen::before { /* @deathcuits */
+            content: ''; position: absolute; inset: 0; pointer-events: none; /* @deathcuits */
+            background: repeating-linear-gradient(to bottom, rgba(255,255,255,.035) 0 1px, transparent 1px 3px); /* @deathcuits */
+        } /* @deathcuits */
+        .entry-screen::after { /* @deathcuits */
+            content: ''; position: absolute; left: 0; right: 0; height: 120px; top: -120px; pointer-events: none; /* @deathcuits */
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,.06), transparent); /* @deathcuits */
+            animation: scan 5s linear infinite; /* @deathcuits */
+        } /* @deathcuits */
+        @keyframes scan { to { transform: translateY(calc(100vh + 240px)); } } /* @deathcuits */
+/* @deathcuits */
+        #ascii { /* @deathcuits */
+            font-family: 'JetBrains Mono', monospace; /* @deathcuits */
+            font-size: clamp(4.5px, 1.75vw, 15px); /* @deathcuits */
+            line-height: 1.05; /* @deathcuits */
+            letter-spacing: 0; /* @deathcuits */
+            white-space: pre; /* @deathcuits */
+            margin: 0; /* @deathcuits */
+            color: #f2f2f2; /* @deathcuits */
+            position: relative; /* @deathcuits */
+            z-index: 2; /* @deathcuits */
+            text-shadow: 0 0 12px rgba(255,255,255,.25); /* @deathcuits */
+        } /* @deathcuits */
+        #ascii .ln { /* @deathcuits */
+            display: block; /* @deathcuits */
+            clip-path: inset(0 100% 0 0); /* @deathcuits */
+            opacity: 0; /* @deathcuits */
+            animation: lineIn .7s var(--ease-out) forwards; /* @deathcuits */
+            animation-delay: calc(var(--i) * 110ms + .3s); /* @deathcuits */
+        } /* @deathcuits */
+        @keyframes lineIn { /* @deathcuits */
+            0%   { clip-path: inset(0 100% 0 0); opacity: 0; filter: blur(6px); transform: translateX(-12px); } /* @deathcuits */
+            40%  { opacity: 1; } /* @deathcuits */
+            100% { clip-path: inset(0 0 0 0); opacity: 1; filter: blur(0); transform: translateX(0); } /* @deathcuits */
+        } /* @deathcuits */
+        #ascii.ready .ln { animation: none; clip-path: none; opacity: 1; } /* @deathcuits */
+        #ascii.ready.glitch .ln:nth-child(3n+1) { animation: glitchA .28s steps(2) 1; } /* @deathcuits */
+        #ascii.ready.glitch .ln:nth-child(3n+2) { animation: glitchB .28s steps(2) 1; } /* @deathcuits */
+        @keyframes glitchA { /* @deathcuits */
+            0% { transform: translateX(0); } 30% { transform: translateX(-6px); text-shadow: 3px 0 #f23f43, -3px 0 #3fa0f2; } /* @deathcuits */
+            60% { transform: translateX(5px); } 100% { transform: translateX(0); } /* @deathcuits */
+        } /* @deathcuits */
+        @keyframes glitchB { /* @deathcuits */
+            0% { transform: translateX(0); } 40% { transform: translateX(7px); text-shadow: -3px 0 #f23f43, 3px 0 #3fa0f2; } /* @deathcuits */
+            100% { transform: translateX(0); } /* @deathcuits */
+        } /* @deathcuits */
+/* @deathcuits */
+        .intro-line { /* @deathcuits */
+            font-family: 'JetBrains Mono', monospace; /* @deathcuits */
+            font-size: 12px; /* @deathcuits */
+            letter-spacing: .25em; /* @deathcuits */
+            color: rgba(255,255,255,.5); /* @deathcuits */
+            margin-top: 28px; /* @deathcuits */
+            min-height: 18px; /* @deathcuits */
+            position: relative; z-index: 2; /* @deathcuits */
+        } /* @deathcuits */
+        .intro-line::after { /* @deathcuits */
+            content: ''; display: inline-block; width: 8px; height: 14px; margin-left: 6px; /* @deathcuits */
+            background: rgba(255,255,255,.7); vertical-align: -2px; /* @deathcuits */
+            animation: blink 1s steps(1) infinite; /* @deathcuits */
+        } /* @deathcuits */
+        @keyframes blink { 50% { opacity: 0; } } /* @deathcuits */
+/* @deathcuits */
+        .enter-btn { /* @deathcuits */
+            font-family: 'JetBrains Mono', monospace; /* @deathcuits */
+            text-transform: uppercase; /* @deathcuits */
+            letter-spacing: 0.5em; /* @deathcuits */
+            font-size: 13px; /* @deathcuits */
+            color: rgba(255, 255, 255, 0.7); /* @deathcuits */
+            background: transparent; /* @deathcuits */
+            border: 1px solid rgba(255, 255, 255, 0.15); /* @deathcuits */
+            border-radius: 4px; /* @deathcuits */
+            cursor: pointer; /* @deathcuits */
+            padding: 14px 64px 14px 70px; /* @deathcuits */
+            margin-top: 26px; /* @deathcuits */
+            position: relative; /* @deathcuits */
+            z-index: 2; /* @deathcuits */
+            overflow: hidden; /* @deathcuits */
+            opacity: 0; /* @deathcuits */
+            transform: translateY(14px); /* @deathcuits */
+            transition: color .5s, border-color .5s, letter-spacing .6s var(--ease-out); /* @deathcuits */
+        } /* @deathcuits */
+        .enter-btn.show { animation: btnIn .9s var(--ease-out) forwards; } /* @deathcuits */
+        @keyframes btnIn { to { opacity: 1; transform: translateY(0); } } /* @deathcuits */
+        .enter-btn::before { /* @deathcuits */
+            content: ''; position: absolute; inset: 0; background: #fff; /* @deathcuits */
+            transform: translateY(101%); transition: transform .5s var(--ease-out); z-index: -1; /* @deathcuits */
+        } /* @deathcuits */
+        .enter-btn:hover { color: #000; border-color: #fff; letter-spacing: .6em; } /* @deathcuits */
+        .enter-btn:hover::before { transform: translateY(0); } /* @deathcuits */
+/* @deathcuits */
+        .main-content { /* @deathcuits */
+            position: relative; /* @deathcuits */
+            z-index: 10; /* @deathcuits */
+            display: flex; /* @deathcuits */
+            flex-direction: column; /* @deathcuits */
+            align-items: center; /* @deathcuits */
+            justify-content: center; /* @deathcuits */
+            width: 100%; /* @deathcuits */
+            height: 100%; /* @deathcuits */
+        } /* @deathcuits */
+        .tilt { /* @deathcuits */
+            transform: perspective(1200px) translate3d(var(--tx, 0px), var(--ty, 0px), 0) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); /* @deathcuits */
+            will-change: transform; /* @deathcuits */
+            position: relative; /* @deathcuits */
+            display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 24px; /* @deathcuits */
+        } /* @deathcuits */
+        .col-left { display: flex; flex-direction: column; align-items: center; } /* @deathcuits */
+        .col-left .chroma-player { width: 420px; } /* @deathcuits */
+/* @deathcuits */
+        .profile-card { /* @deathcuits */
+            position: relative; /* @deathcuits */
+            width: 380px; /* @deathcuits */
+            max-width: 92vw; /* @deathcuits */
+            background: linear-gradient(160deg, rgba(255,255,255,.12), rgba(255,255,255,.03) 45%, rgba(255,255,255,.07)); /* @deathcuits */
+            backdrop-filter: blur(18px) saturate(1.7) brightness(1.05); /* @deathcuits */
+            -webkit-backdrop-filter: blur(18px) saturate(1.7) brightness(1.05); /* @deathcuits */
+            border: 1px solid rgba(255,255,255,.16); /* @deathcuits */
+            border-radius: 24px; /* @deathcuits */
+            overflow: hidden; /* @deathcuits */
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(255,255,255,.06), inset 0 0 30px rgba(255,255,255,.04), 0 25px 60px -15px rgba(0, 0, 0, 0.7); /* @deathcuits */
+            opacity: 0; /* @deathcuits */
+            clip-path: inset(50% 0 50% 0 round 24px); /* @deathcuits */
+            filter: blur(14px); /* @deathcuits */
+            transform: scale(.92); /* @deathcuits */
+        } /* @deathcuits */
+        .entered .profile-card { /* @deathcuits */
+            animation: cardOpen 1.3s var(--ease-out) 1.2s forwards; /* @deathcuits */
+        } /* @deathcuits */
+        @keyframes cardOpen { /* @deathcuits */
+            60% { filter: blur(0); } /* @deathcuits */
+            100% { opacity: 1; clip-path: inset(0% 0 0% 0 round 24px); filter: none; transform: scale(1); } /* @deathcuits */
+        } /* @deathcuits */
+/* @deathcuits */
+        .profile-card::before { /* @deathcuits */
+            content: ''; position: absolute; inset: 0; border-radius: 24px; padding: 1px; z-index: 6; pointer-events: none; /* @deathcuits */
+            background: conic-gradient(from var(--angle), transparent 0 70%, rgba(255,255,255,.7) 85%, transparent 100%); /* @deathcuits */
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); /* @deathcuits */
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); /* @deathcuits */
+            -webkit-mask-composite: xor; mask-composite: exclude; /* @deathcuits */
+            animation: spin 6s linear infinite; /* @deathcuits */
+        } /* @deathcuits */
+        @keyframes spin { to { --angle: 360deg; } } /* @deathcuits */
+/* @deathcuits */
+        .profile-card::after { /* @deathcuits */
+            content: ''; position: absolute; inset: 0; border-radius: 24px; z-index: 30; pointer-events: none; /* @deathcuits */
+            background: /* @deathcuits */
+                radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.26), rgba(255,255,255,0) 45%), /* @deathcuits */
+                linear-gradient(125deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 70%, rgba(255,255,255,.08) 100%); /* @deathcuits */
+        } /* @deathcuits */
+/* @deathcuits */
+        .rise { opacity: 0; transform: translateY(18px); filter: blur(6px); } /* @deathcuits */
+        .entered .rise { animation: riseIn .8s var(--ease-out) forwards; animation-delay: calc(1.9s + var(--d, 0) * 120ms); } /* @deathcuits */
+        @keyframes riseIn { to { opacity: 1; transform: translateY(0); filter: none; } } /* @deathcuits */
+/* @deathcuits */
+        .banner-container { /* @deathcuits */
+            width: 100%; /* @deathcuits */
+            height: 170px; /* @deathcuits */
+            background-size: cover; /* @deathcuits */
+            background-position: center; /* @deathcuits */
+            position: relative; /* @deathcuits */
+            z-index: 2; /* @deathcuits */
+            overflow: hidden; /* @deathcuits */
+        } /* @deathcuits */
+        .banner-container::after { /* @deathcuits */
+            content: ''; position: absolute; inset: 0; /* @deathcuits */
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.18) 50%, transparent 60%); /* @deathcuits */
+            transform: translateX(-120%); /* @deathcuits */
+            transition: transform 1s var(--ease-out); /* @deathcuits */
+        } /* @deathcuits */
+        .banner-container:hover::after { transform: translateX(120%); } /* @deathcuits */
+/* @deathcuits */
+        .banner-container::before { /* @deathcuits */
+            content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; /* @deathcuits */
+            background: linear-gradient(to bottom, rgba(0,0,0,.15) 0%, rgba(0,0,0,0) 40%, rgba(5,5,5,.55) 100%); /* @deathcuits */
+        } /* @deathcuits */
+        .banner-img { position: absolute; inset: 0; background-size: cover; background-position: center; } /* @deathcuits */
+        .entered .banner-img { animation: bannerZoom 2.4s var(--ease-out) 1.2s both; } /* @deathcuits */
+        @keyframes bannerZoom { from { transform: scale(1.35); } to { transform: scale(1); } } /* @deathcuits */
+/* @deathcuits */
+        .avatar-wrapper { /* @deathcuits */
+            position: relative; /* @deathcuits */
+            width: 104px; /* @deathcuits */
+            height: 104px; /* @deathcuits */
+            margin: -52px auto 16px; /* @deathcuits */
+            z-index: 3; /* @deathcuits */
+        } /* @deathcuits */
+        .avatar { /* @deathcuits */
+            width: 100%; height: 100%; /* @deathcuits */
+            border-radius: 50%; /* @deathcuits */
+            border: 6px solid #0a0a0a; /* @deathcuits */
+            background: #0a0a0a; /* @deathcuits */
+            object-fit: cover; /* @deathcuits */
+            position: relative; z-index: 3; /* @deathcuits */
+            transition: transform .6s var(--ease-spring); /* @deathcuits */
+        } /* @deathcuits */
+        .avatar-wrapper:hover .avatar { transform: scale(1.08) rotate(-4deg); } /* @deathcuits */
+        .avatar-wrapper::before { /* @deathcuits */
+            content: ''; position: absolute; inset: -4px; border-radius: 50%; z-index: 2; /* @deathcuits */
+            border: 1px solid rgba(255,255,255,.35); /* @deathcuits */
+            animation: ping 3s ease-out infinite; /* @deathcuits */
+        } /* @deathcuits */
+        @keyframes ping { 0% { transform: scale(.95); opacity: .8; } 100% { transform: scale(1.35); opacity: 0; } } /* @deathcuits */
+/* @deathcuits */
+        .decoration { /* @deathcuits */
+            position: absolute; top: 50%; left: 50%; /* @deathcuits */
+            transform: translate(-50%, -50%); /* @deathcuits */
+            width: 111px; height: 111px; /* @deathcuits */
+            pointer-events: none; z-index: 4; /* @deathcuits */
+        } /* @deathcuits */
+/* @deathcuits */
+        .status-wrapper { /* @deathcuits */
+            position: absolute; bottom: 4px; right: 4px; /* @deathcuits */
+            width: 24px; height: 24px; /* @deathcuits */
+            background: #0a0a0a; border-radius: 50%; /* @deathcuits */
+            display: flex; align-items: center; justify-content: center; /* @deathcuits */
+            z-index: 5; /* @deathcuits */
+        } /* @deathcuits */
+        .status-dot { width: 16px; height: 16px; border-radius: 50%; transition: background .6s, box-shadow .6s; } /* @deathcuits */
+        .online { background: #23a55a; box-shadow: 0 0 12px rgba(35, 165, 90, 0.6); animation: breathe 2.4s ease-in-out infinite; } /* @deathcuits */
+        .idle { background: #f0b232; box-shadow: 0 0 12px rgba(240, 178, 50, 0.6); } /* @deathcuits */
+        .dnd { background: #f23f43; box-shadow: 0 0 12px rgba(242, 63, 67, 0.6); } /* @deathcuits */
+        .offline { background: #80848e; } /* @deathcuits */
+        @keyframes breathe { 50% { transform: scale(.82); } } /* @deathcuits */
+/* @deathcuits */
+        .name-glow { background: linear-gradient(90deg, #fff 0%, #fff 40%, #8a8a8a 50%, #fff 60%, #fff 100%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; } /* @deathcuits */
+        @keyframes nameShine { from { background-position: 150% 0; } to { background-position: -100% 0; } } /* @deathcuits */
+        .entered .name-glow { animation: riseIn .8s var(--ease-out) forwards, nameShine 5s linear infinite; animation-delay: calc(1.9s + var(--d, 0) * 120ms), 0s; } /* @deathcuits */
+/* @deathcuits */
+        .custom-status-card { /* @deathcuits */
+            background: rgba(255, 255, 255, 0.03); /* @deathcuits */
+            border: 1px solid rgba(255, 255, 255, 0.05); /* @deathcuits */
+            border-radius: 8px; /* @deathcuits */
+            padding: 8px 12px; /* @deathcuits */
+            margin-top: 12px; /* @deathcuits */
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px; /* @deathcuits */
+            max-width: 100%; /* @deathcuits */
+            position: relative; z-index: 3; /* @deathcuits */
+        } /* @deathcuits */
+/* @deathcuits */
+        .content-section { /* @deathcuits */
+            background: rgba(255, 255, 255, 0.03); /* @deathcuits */
+            border-top: 1px solid rgba(255, 255, 255, 0.1); /* @deathcuits */
+            padding: 24px; /* @deathcuits */
+            margin-top: 20px; /* @deathcuits */
+            display: flex; flex-direction: column; gap: 20px; /* @deathcuits */
+            position: relative; z-index: 3; /* @deathcuits */
+        } /* @deathcuits */
+/* @deathcuits */
+        .section-header { /* @deathcuits */
+            font-size: 11px; font-weight: 800; /* @deathcuits */
+            text-transform: uppercase; letter-spacing: 0.05em; /* @deathcuits */
+            color: rgba(255, 255, 255, 0.4); /* @deathcuits */
+            margin-bottom: 6px; /* @deathcuits */
+        } /* @deathcuits */
+/* @deathcuits */
+        .divider { width: 100%; height: 1px; background: rgba(255,255,255,.08); transform-origin: left; transform: scaleX(0); } /* @deathcuits */
+        .entered .divider { animation: lineGrow 1s var(--ease-out) 2.6s forwards; } /* @deathcuits */
+        @keyframes lineGrow { to { transform: scaleX(1); } } /* @deathcuits */
+/* @deathcuits */
+        .activity-box { display: flex; align-items: flex-start; gap: 16px; } /* @deathcuits */
+        .activity-art-wrapper { position: relative; width: 64px; height: 64px; flex-shrink: 0; } /* @deathcuits */
+        .activity-art { width: 100%; height: 100%; border-radius: 12px; object-fit: cover; box-shadow: 0 8px 16px rgba(0,0,0,0.5); } /* @deathcuits */
+/* @deathcuits */
+        .spotify-bar { width: 3px; background: #1DB954; border-radius: 2px; animation: pulseHeight 0.7s infinite alternate ease-in-out; } /* @deathcuits */
+        @keyframes pulseHeight { 0% { height: 4px; } 100% { height: 16px; } } /* @deathcuits */
+/* @deathcuits */
+/* @deathcuits */
+        .socials { display: flex; justify-content: center; gap: 10px; padding-top: 2px; } /* @deathcuits */
+        .soc { /* @deathcuits */
+            position: relative; width: 38px; height: 38px; border-radius: 50%; /* @deathcuits */
+            display: flex; align-items: center; justify-content: center; /* @deathcuits */
+            background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); /* @deathcuits */
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.2); /* @deathcuits */
+            color: rgba(255,255,255,.75); font-size: 20px; text-decoration: none; /* @deathcuits */
+            transition: transform .4s var(--ease-spring), color .25s, background .25s, box-shadow .25s; /* @deathcuits */
+        } /* @deathcuits */
+        .soc svg { width: 17px; height: 17px; fill: currentColor; } /* @deathcuits */
+        .soc:hover { transform: translateY(-4px) scale(1.08); color: #fff; background: rgba(255,255,255,.14); box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 8px 18px rgba(0,0,0,.45); } /* @deathcuits */
+        .soc:active { transform: scale(.92); } /* @deathcuits */
+        .soc::after { /* @deathcuits */
+            content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%; /* @deathcuits */
+            transform: translate(-50%, 4px); opacity: 0; pointer-events: none; white-space: nowrap; /* @deathcuits */
+            font: 600 10px 'JetBrains Mono', monospace; color: #fff; /* @deathcuits */
+            background: rgba(0,0,0,.7); border: 1px solid rgba(255,255,255,.12); border-radius: 6px; padding: 4px 8px; /* @deathcuits */
+            transition: opacity .2s, transform .3s var(--ease-out); /* @deathcuits */
+        } /* @deathcuits */
+        .soc:hover::after { opacity: 1; transform: translate(-50%, 0); } /* @deathcuits */
+/* @deathcuits */
+        .badge-pill { /* @deathcuits */
+            display: inline-flex; align-items: center; gap: 8px; /* @deathcuits */
+            padding: 3px 10px; border-radius: 999px; /* @deathcuits */
+            background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.1); /* @deathcuits */
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.12); /* @deathcuits */
+        } /* @deathcuits */
+        .badge-pill img { height: 18px; width: auto; object-fit: contain; transition: transform .35s var(--ease-spring), filter .3s; } /* @deathcuits */
+        .badge-pill img:hover { transform: scale(1.25) rotate(-6deg); filter: drop-shadow(0 0 6px rgba(255,255,255,.5)); } /* @deathcuits */
+/* @deathcuits */
+        .term { /* @deathcuits */
+            position: relative; /* @deathcuits */
+            width: 420px; max-width: 92vw; /* @deathcuits */
+            height: 440px; /* @deathcuits */
+            display: flex; flex-direction: column; /* @deathcuits */
+            border-radius: 16px; overflow: hidden; /* @deathcuits */
+            background: linear-gradient(160deg, rgba(255,255,255,.1), rgba(255,255,255,.02) 50%, rgba(255,255,255,.05)); /* @deathcuits */
+            backdrop-filter: blur(18px) saturate(1.6); /* @deathcuits */
+            -webkit-backdrop-filter: blur(18px) saturate(1.6); /* @deathcuits */
+            border: 1px solid rgba(255,255,255,.16); /* @deathcuits */
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 25px 50px -15px rgba(0,0,0,.7); /* @deathcuits */
+            font-family: 'JetBrains Mono', monospace; /* @deathcuits */
+            opacity: 0; transform: translateX(-40px); filter: blur(10px); /* @deathcuits */
+        } /* @deathcuits */
+        .entered .term { animation: termIn 1s var(--ease-out) 2.2s forwards; } /* @deathcuits */
+        @keyframes termIn { to { opacity: 1; transform: translateX(0); filter: none; } } /* @deathcuits */
+        .term-bar { display: flex; align-items: center; gap: 7px; padding: 9px 14px; font-size: 10px; color: rgba(255,255,255,.45); background: rgba(0,0,0,.28); border-bottom: 1px solid rgba(255,255,255,.08); } /* @deathcuits */
+        .term-bar i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; } /* @deathcuits */
+        .term-bar span { margin-left: auto; margin-right: auto; transform: translateX(-17px); } /* @deathcuits */
+        .term-body { flex: 1; overflow-y: auto; padding: 12px 14px; font-size: 11px; line-height: 1.5; color: #d8d8d8; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.2) transparent; } /* @deathcuits */
+        .tl { white-space: pre-wrap; word-break: break-word; min-height: 1.5em; } /* @deathcuits */
+        .tl .g { color: #4ade80; } .tl .b { color: #60a5fa; } .tl .r { color: #f87171; } .tl .y { color: #facc15; } .tl .c { color: #22d3ee; } .tl .d { color: rgba(255,255,255,.4); } /* @deathcuits */
+        .nf { display: flex; gap: 14px; align-items: flex-start; white-space: normal; margin: 4px 0; } /* @deathcuits */
+        .nf pre { margin: 0; font: inherit; line-height: 1.15; } /* @deathcuits */
+        .nf-art { color: #f1f1f1; } /* @deathcuits */
+        .nf-info { line-height: 1.5 !important; white-space: pre; } /* @deathcuits */
+        .term-input { display: none; align-items: center; } /* @deathcuits */
+        .term-input.on { display: flex; } /* @deathcuits */
+        .term-input input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: #fff; font: inherit; caret-color: #fff; padding: 0; } /* @deathcuits */
+        @media (max-width: 920px) { /* @deathcuits */
+            .tilt { flex-direction: column; } /* @deathcuits */
+            .term { display: none; } /* @deathcuits */
+            .col-left { order: 2; } /* @deathcuits */
+            .col-left .chroma-player { width: 380px; } /* @deathcuits */
+        } /* @deathcuits */
+/* @deathcuits */
+        .chroma-player { /* @deathcuits */
+            width: 380px; /* @deathcuits */
+            max-width: 92vw; /* @deathcuits */
+            margin-top: 16px; /* @deathcuits */
+            position: relative; /* @deathcuits */
+            overflow: hidden; /* @deathcuits */
+            background: linear-gradient(160deg, rgba(255,255,255,.12), rgba(255,255,255,.03) 50%, rgba(255,255,255,.07)); /* @deathcuits */
+            backdrop-filter: blur(18px) saturate(1.7); /* @deathcuits */
+            -webkit-backdrop-filter: blur(18px) saturate(1.7); /* @deathcuits */
+            border-radius: 24px; /* @deathcuits */
+            border: 1px solid rgba(255, 255, 255, 0.16); /* @deathcuits */
+            padding: 16px; /* @deathcuits */
+            display: flex; align-items: center; gap: 14px; /* @deathcuits */
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(255,255,255,.05), 0 15px 30px rgba(0,0,0,0.5); /* @deathcuits */
+            opacity: 0; /* @deathcuits */
+            transform: translateY(60px) scale(.9); /* @deathcuits */
+            transition: box-shadow .4s ease; /* @deathcuits */
+        } /* @deathcuits */
+        .entered .chroma-player { animation: playerIn 1s var(--ease-spring) 2.5s forwards; } /* @deathcuits */
+        @keyframes playerIn { to { opacity: 1; transform: translateY(0) scale(1); } } /* @deathcuits */
+        .chroma-player:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 25px 45px rgba(0,0,0,0.6); } /* @deathcuits */
+        .chroma-player::after { content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: 24px; /* @deathcuits */
+            background: radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.18), transparent 55%), linear-gradient(125deg, rgba(255,255,255,.14), transparent 35%); } /* @deathcuits */
+/* @deathcuits */
+        .album-art-left { /* @deathcuits */
+            width: 64px; height: 64px; /* @deathcuits */
+            border-radius: 12px; /* @deathcuits */
+            background-size: cover; background-position: center; /* @deathcuits */
+            flex-shrink: 0; /* @deathcuits */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); /* @deathcuits */
+            transition: border-radius .8s var(--ease-out), transform .8s var(--ease-out); /* @deathcuits */
+        } /* @deathcuits */
+        .chroma-player.is-playing .album-art-left { border-radius: 50%; animation: vinyl 8s linear infinite; } /* @deathcuits */
+        @keyframes vinyl { to { transform: rotate(360deg); } } /* @deathcuits */
+/* @deathcuits */
+        .player-right { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; } /* @deathcuits */
+        .track-info-row { display: flex; flex-direction: column; } /* @deathcuits */
+        .track-title { font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* @deathcuits */
+        .track-artist { font-size: 13px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* @deathcuits */
+/* @deathcuits */
+        .progress-area { display: flex; align-items: center; gap: 8px; margin-top: 2px; } /* @deathcuits */
+        .time-label { font-size: 10px; color: rgba(255,255,255,0.5); min-width: 30px; text-align: center; font-variant-numeric: tabular-nums; } /* @deathcuits */
+        .progress-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; cursor: pointer; position: relative; transition: height .2s; } /* @deathcuits */
+        .progress-bar:hover { height: 7px; } /* @deathcuits */
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #e74c3c, #ff8a65); border-radius: 2px; position: relative; } /* @deathcuits */
+        .progress-fill::after { content: ''; position: absolute; right: -4px; top: 50%; width: 9px; height: 9px; border-radius: 50%; background: #fff; transform: translateY(-50%) scale(0); transition: transform .25s var(--ease-spring); } /* @deathcuits */
+        .progress-bar:hover .progress-fill::after { transform: translateY(-50%) scale(1); } /* @deathcuits */
+/* @deathcuits */
+        .controls-row { display: flex; align-items: center; justify-content: space-between; } /* @deathcuits */
+        .control-btns { display: flex; align-items: center; gap: 14px; } /* @deathcuits */
+        .ctrl-btn { /* @deathcuits */
+            background: none; border: none; color: #fff; cursor: pointer; /* @deathcuits */
+            display: flex; align-items: center; justify-content: center; /* @deathcuits */
+            width: 30px; height: 30px; border-radius: 50%; /* @deathcuits */
+            transition: transform .3s var(--ease-spring), background .2s, opacity .2s; /* @deathcuits */
+            opacity: .7; font-size: 20px; /* @deathcuits */
+        } /* @deathcuits */
+        .ctrl-btn:hover { opacity: 1; background: rgba(255,255,255,.1); transform: scale(1.15); } /* @deathcuits */
+        .ctrl-btn:active { transform: scale(.85); } /* @deathcuits */
+        .ctrl-btn.play-btn { width: 36px; height: 36px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.1); font-size: 22px; } /* @deathcuits */
+/* @deathcuits */
+        .extra-btns { display: flex; gap: 12px; color: rgba(255,255,255,0.5); font-size: 16px; } /* @deathcuits */
+        .extra-btns i { cursor: pointer; transition: color .2s, transform .4s var(--ease-spring); } /* @deathcuits */
+        .extra-btns i:hover { color: #fff; } /* @deathcuits */
+        .extra-btns i:active { transform: scale(.7); } /* @deathcuits */
+        .extra-btns i.active { color: #e74c3c; animation: pop .45s var(--ease-spring); } /* @deathcuits */
+        @keyframes pop { 0% { transform: scale(.6); } 60% { transform: scale(1.35); } 100% { transform: scale(1); } } /* @deathcuits */
+/* @deathcuits */
+        @media (prefers-reduced-motion: reduce) { /* @deathcuits */
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } /* @deathcuits */
+        } /* @deathcuits */
+    </style> <!-- @deathcuits -->
+</head> <!-- @deathcuits -->
+<body x-data="profileCard('984436577612759111')" :class="entered ? 'entered' : ''"> <!-- @deathcuits -->
+/* @deathcuits */
+    <div class="ambient-bg"></div> <!-- @deathcuits -->
+    <div class="grain"></div> <!-- @deathcuits -->
+/* @deathcuits */
+    <div class="entry-screen" :class="entered ? 'hidden-smooth' : ''"> <!-- @deathcuits -->
+<pre id="ascii">████    ████  ▄▄▓████████ ▄▀░▒ ███▓████▄▄    ▄▄▓████████ ████▄   ████ <!-- @deathcuits -->
+▒▓▓▓    ▓▓▓▒ ▒▒▓▓▓▓▓▓▓▓▓▓ ░█▄▀ ▒▒▓▓▓▓▓▓▓▓▓▄ ▒▒▓▓▓▓▓▓▓▓▓▓ ▒▓▓▓▓▓▄ ▓▓▓▒ <!-- @deathcuits -->
+░▒▒▒    ▒▒▒░ ░▒▒▒▀   ░▒▒▒ ▀▀▀▀ ░▒▒▒▀  ▀▒▒▒▒ ░▒▒▒▀   ░▒▒▒ ░▒▒▒▒▒▒▒▒▒▒░ <!-- @deathcuits -->
+ ░░░░░░░░░░   ░░░▄▄▄▄     ░     ░░░    ░░░░  ░░░▄▄▄▄      ░░░ ▀░░░░░  <!-- @deathcuits -->
+▀▀▀▀▀▀▀▀▀▀▀▀ ░░░▒▒▒▓▓     ▒░░░ ▀▀▀▀    ▀▀▀▀ ░░░▒▒▒▓▓     ▀▀▀▀   ▀▀▀▀▀ <!-- @deathcuits -->
+   ░       ░ ░   ▀▀▀▀     ▓▒▒▒ ░          ░ ░   ▀▀▀▀        ░       ░ <!-- @deathcuits -->
+░░░▒    ░░░▒ ▒░░░▄   ░▒▒▒ █▓▓▓ ▒░░░▄  ▄░░░▒ ▒░░░▄   ░▒▒▒ ░░░▒    ░░░▒ <!-- @deathcuits -->
+▒▒▒▓    ▒▒▒▓ ▓▒▒▒▒▒▒▒▒▒▒▒ ████ ▓▒▒▒▒▒▒▒▒▒▒▒ ▓▒▒▒▒▒▒▒▒▒▒▒ ▒▒▒▓    ▒▒▒▓ <!-- @deathcuits -->
+▓███    ▓▓▓█  ▀▀▓▓▓▓▓▓███ ████ ███▓▓▓▓▓▓▀▀   ▀▀▓▓▓▓▓▓███ ▓███    ▓▓▓█<!-- @deathcuits --></pre> <!-- @deathcuits -->
+        <div class="intro-line" id="introLine"></div> <!-- @deathcuits -->
+        <button class="enter-btn" id="enterBtn" @click="enter()">Enter</button> <!-- @deathcuits -->
+    </div> <!-- @deathcuits -->
+/* @deathcuits */
+    <div class="main-content" x-show="entered" style="display: none;"> <!-- @deathcuits -->
+        <div class="tilt" id="tilt"> <!-- @deathcuits -->
+            <div class="col-left"> <!-- @deathcuits -->
+            <div class="term" id="term"> <!-- @deathcuits -->
+                <div class="term-bar"><i style="background:#f87171"></i><i style="background:#facc15"></i><i style="background:#4ade80"></i><span>iyxei@heiden: ~</span></div> <!-- @deathcuits -->
+                <div class="term-body" id="termBody"> <!-- @deathcuits -->
+                    <label class="tl term-input" id="termInputRow"><span class="g">iyxei@heiden</span><span class="d">:</span><span class="b">~</span><span class="d">$&nbsp;</span><input id="termInput" type="text" autocomplete="off" spellcheck="false" autocapitalize="off"></label> <!-- @deathcuits -->
+                </div> <!-- @deathcuits -->
+            </div> <!-- @deathcuits -->
+            <div class="chroma-player" x-data="musicPlayer" :class="playing ? 'is-playing' : ''"> <!-- @deathcuits -->
+                <div class="album-art-left" :style="'background-image: url(' + albumCover + ')'"></div> <!-- @deathcuits -->
+                <div class="player-right"> <!-- @deathcuits -->
+                    <div class="track-info-row"> <!-- @deathcuits -->
+                        <span class="track-title">HEAVEN AND BACK</span> <!-- @deathcuits -->
+                        <span class="track-artist">Chase Atlantic</span> <!-- @deathcuits -->
+                    </div> <!-- @deathcuits -->
+                    <div class="progress-area"> <!-- @deathcuits -->
+                        <span class="time-label" x-text="formatTime(currentTime)"></span> <!-- @deathcuits -->
+                        <div class="progress-bar" @click="seek"> <!-- @deathcuits -->
+                            <div class="progress-fill" :style="'width:' + progress + '%'"></div> <!-- @deathcuits -->
+                        </div> <!-- @deathcuits -->
+                        <span class="time-label" x-text="formatTime(duration)"></span> <!-- @deathcuits -->
+                    </div> <!-- @deathcuits -->
+                    <div class="controls-row"> <!-- @deathcuits -->
+                        <div class="control-btns"> <!-- @deathcuits -->
+                            <button class="ctrl-btn" @click="prev"><i class='bx bx-skip-previous'></i></button> <!-- @deathcuits -->
+                            <button class="ctrl-btn play-btn" @click="toggle"> <!-- @deathcuits -->
+                                <i class='bx' :class="playing ? 'bx-pause' : 'bx-play'"></i> <!-- @deathcuits -->
+                            </button> <!-- @deathcuits -->
+                            <button class="ctrl-btn" @click="next"><i class='bx bx-skip-next'></i></button> <!-- @deathcuits -->
+                        </div> <!-- @deathcuits -->
+                        <div class="extra-btns"> <!-- @deathcuits -->
+                            <i class='bx bx-shuffle' :class="{ 'active': shuffle }" @click="shuffle = !shuffle"></i> <!-- @deathcuits -->
+                            <i class='bx bx-repeat' :class="{ 'active': repeat }" @click="repeat = !repeat"></i> <!-- @deathcuits -->
+                            <i class='bx bx-heart' :class="{ 'active': liked }" @click="liked = !liked"></i> <!-- @deathcuits -->
+                        </div> <!-- @deathcuits -->
+                    </div> <!-- @deathcuits -->
+                </div> <!-- @deathcuits -->
+            </div> <!-- @deathcuits -->
+            </div> <!-- @deathcuits -->
+            <div class="profile-card"> <!-- @deathcuits -->
+                <div class="banner-container rise" style="--d:0"><div class="banner-img" :style="'background-image: url(' + banner + ')'"></div></div> <!-- @deathcuits -->
+                <div class="px-6 pb-2 text-center relative z-20"> <!-- @deathcuits -->
+                    <div class="avatar-wrapper rise" style="--d:1"> <!-- @deathcuits -->
+                        <img :src="avatar" class="avatar" alt="Avatar"> <!-- @deathcuits -->
+                        <template x-if="decoration"> <!-- @deathcuits -->
+                            <img :src="decoration" class="decoration" alt="Decoration"> <!-- @deathcuits -->
+                        </template> <!-- @deathcuits -->
+                        <div class="status-wrapper"> <!-- @deathcuits -->
+                            <div class="status-dot" :class="status"></div> <!-- @deathcuits -->
+                        </div> <!-- @deathcuits -->
+                    </div> <!-- @deathcuits -->
+                    <h1 class="rise name-glow text-2xl font-black tracking-tight" style="--d:2" x-text="name"></h1> <!-- @deathcuits -->
+                    <div class="rise flex flex-wrap items-center justify-center gap-2 mt-1.5" style="--d:3"> <!-- @deathcuits -->
+                        <p class="text-xs font-semibold text-white/40 tracking-[0.2em] uppercase" x-text="'@' + username"></p> <!-- @deathcuits -->
+                        <div class="badge-pill"> <!-- @deathcuits -->
+                            <img src="https://file.garden/aPNQD5oGSn0LJI5K/Taeyeon-removebg-preview.png" alt="Taeyeon"> <!-- @deathcuits -->
+                            <img src="https://file.garden/aPNQD5oGSn0LJI5K/ransxm.png" alt="ransxm"> <!-- @deathcuits -->
+                        </div> <!-- @deathcuits -->
+                    </div> <!-- @deathcuits -->
+                    <div class="rise" style="--d:4"> <!-- @deathcuits -->
+                        <template x-if="customStatus"> <!-- @deathcuits -->
+                            <div class="custom-status-card"> <!-- @deathcuits -->
+                                <template x-if="customStatusEmoji"> <!-- @deathcuits -->
+                                    <span x-text="customStatusEmoji" class="text-sm"></span> <!-- @deathcuits -->
+                                </template> <!-- @deathcuits -->
+                                <span class="text-xs font-medium text-white/80" x-text="customStatus"></span> <!-- @deathcuits -->
+                            </div> <!-- @deathcuits -->
+                        </template> <!-- @deathcuits -->
+                    </div> <!-- @deathcuits -->
+                </div> <!-- @deathcuits -->
+                <div class="content-section"> <!-- @deathcuits -->
+                    <div class="text-left rise" style="--d:5"> <!-- @deathcuits -->
+                        <h3 class="section-header">About Me</h3> <!-- @deathcuits -->
+                        <p class="text-[13px] text-white/70 leading-relaxed font-medium">always ransxm.</p> <!-- @deathcuits -->
+                    </div> <!-- @deathcuits -->
+                    <div class="text-left rise" style="--d:6"> <!-- @deathcuits -->
+                        <h3 class="section-header">Discord Member Since</h3> <!-- @deathcuits -->
+                        <div class="flex items-center gap-2"> <!-- @deathcuits -->
+                            <div class="w-2 h-2 rounded-full bg-white/20"></div> <!-- @deathcuits -->
+                            <p class="text-[13px] text-white/90 font-medium" x-text="memberSince"></p> <!-- @deathcuits -->
+                        </div> <!-- @deathcuits -->
+                    </div> <!-- @deathcuits -->
+                    <div class="divider"></div> <!-- @deathcuits -->
+                    <div class="rise" style="--d:7"> <!-- @deathcuits -->
+                        <template x-if="isSpotify"> <!-- @deathcuits -->
+                            <div class="activity-box text-left"> <!-- @deathcuits -->
+                                <div class="activity-art-wrapper"> <!-- @deathcuits -->
+                                    <img :src="spotify.album_art_url" class="activity-art"> <!-- @deathcuits -->
+                                </div> <!-- @deathcuits -->
+                                <div class="overflow-hidden flex-1 py-1"> <!-- @deathcuits -->
+                                    <div class="flex items-center gap-2 mb-1.5"> <!-- @deathcuits -->
+                                        <span class="text-[10px] text-[#1DB954] font-black uppercase tracking-widest">Listening to Spotify</span> <!-- @deathcuits -->
+                                        <div class="flex items-end gap-[2px] h-[16px] ml-auto"> <!-- @deathcuits -->
+                                            <div class="spotify-bar" style="animation-delay: 0s"></div> <!-- @deathcuits -->
+                                            <div class="spotify-bar" style="animation-delay: 0.2s"></div> <!-- @deathcuits -->
+                                            <div class="spotify-bar" style="animation-delay: 0.4s"></div> <!-- @deathcuits -->
+                                        </div> <!-- @deathcuits -->
+                                    </div> <!-- @deathcuits -->
+                                    <p class="text-white text-[13px] font-bold truncate leading-tight hover:underline cursor-pointer" x-text="spotify.song"></p> <!-- @deathcuits -->
+                                    <p class="text-white/60 text-[11px] truncate mt-0.5" x-text="'by ' + spotify.artist"></p> <!-- @deathcuits -->
+                                    <p class="text-white/40 text-[11px] truncate mt-0.5" x-text="'on ' + spotify.album"></p> <!-- @deathcuits -->
+                                </div> <!-- @deathcuits -->
+                            </div> <!-- @deathcuits -->
+                        </template> <!-- @deathcuits -->
+                        <template x-if="!isSpotify && hasActivity"> <!-- @deathcuits -->
+                            <div class="activity-box text-left"> <!-- @deathcuits -->
+                                <div class="activity-art-wrapper flex items-center justify-center bg-white/5 rounded-xl border border-white/10"> <!-- @deathcuits -->
+                                    <template x-if="activityImage"> <!-- @deathcuits -->
+                                        <img :src="activityImage" class="activity-art"> <!-- @deathcuits -->
+                                    </template> <!-- @deathcuits -->
+                                    <template x-if="!activityImage"> <!-- @deathcuits -->
+                                        <svg class="w-8 h-8 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <!-- @deathcuits -->
+                                    </template> <!-- @deathcuits -->
+                                </div> <!-- @deathcuits -->
+                                <div class="overflow-hidden flex-1 py-1"> <!-- @deathcuits -->
+                                    <span class="text-[10px] text-indigo-400 font-black uppercase tracking-widest mb-1.5 block" x-text="activity.type === 0 ? 'Playing a game' : 'Doing an activity'"></span> <!-- @deathcuits -->
+                                    <p class="text-white text-[13px] font-bold truncate leading-tight" x-text="activity.name"></p> <!-- @deathcuits -->
+                                    <p class="text-white/60 text-[11px] truncate mt-0.5" x-text="activity.details || ''"></p> <!-- @deathcuits -->
+                                    <p class="text-white/40 text-[11px] truncate mt-0.5" x-text="activity.state || ''"></p> <!-- @deathcuits -->
+                                </div> <!-- @deathcuits -->
+                            </div> <!-- @deathcuits -->
+                        </template> <!-- @deathcuits -->
+                        <template x-if="!isSpotify && !hasActivity"> <!-- @deathcuits -->
+                            <div class="text-center py-2"> <!-- @deathcuits -->
+                                <p class="text-[11px] text-white/30 font-medium uppercase tracking-wider font-mono">No active presence detected</p> <!-- @deathcuits -->
+                            </div> <!-- @deathcuits -->
+                        </template> <!-- @deathcuits -->
+                    </div> <!-- @deathcuits -->
+                    <div class="socials rise" style="--d:8"> <!-- @deathcuits -->
+                        <a class="soc" href="https://instagram.com/deobfx" target="_blank" rel="noopener" data-tip="deobfx" aria-label="Instagram"><i class='bx bxl-instagram'></i></a> <!-- @deathcuits -->
+                        <a class="soc" href="https://x.com/htrb1337" target="_blank" rel="noopener" data-tip="htrb1337" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a> <!-- @deathcuits -->
+                        <a class="soc" href="#" x-data="{ c: false }" :data-tip="c ? 'copied!' : 'deathcuits'" @click.prevent="navigator.clipboard && navigator.clipboard.writeText('deathcuits'); c = true; setTimeout(() => c = false, 1500)" aria-label="Discord"><i class='bx bxl-discord-alt'></i></a> <!-- @deathcuits -->
+                    </div> <!-- @deathcuits -->
+                </div> <!-- @deathcuits -->
+            </div> <!-- @deathcuits -->
+        </div> <!-- @deathcuits -->
+    </div> <!-- @deathcuits -->
+/* @deathcuits */
+    <script>// @deathcuits
+        const audio = new Audio('https://file.garden/aTZTACJbkUlB55j2/Chase%20Atlantic%20-%20HEAVEN%20AND%20BACK.mp3'); // @deathcuits
+        audio.loop = false; // @deathcuits
+/* @deathcuits */
+        (function () { // @deathcuits
+            const pre = document.getElementById('ascii'); // @deathcuits
+            const lines = pre.textContent.split('\n'); // @deathcuits
+            pre.innerHTML = lines.map((l, i) => '<span class="ln" style="--i:' + i + '">' + (l || ' ') + '</span>').join(''); // @deathcuits
+/* @deathcuits */
+            const total = lines.length * 110 + 900; // @deathcuits
+            const msg = "larp me, it's free."; // @deathcuits
+            const el = document.getElementById('introLine'); // @deathcuits
+            setTimeout(() => { // @deathcuits
+                let n = 0; // @deathcuits
+                const t = setInterval(() => { // @deathcuits
+                    el.textContent = msg.slice(0, ++n); // @deathcuits
+                    if (n >= msg.length) { // @deathcuits
+                        clearInterval(t); // @deathcuits
+                        document.getElementById('enterBtn').classList.add('show'); // @deathcuits
+                    } // @deathcuits
+                }, 55); // @deathcuits
+            }, total); // @deathcuits
+/* @deathcuits */
+            setTimeout(() => { // @deathcuits
+                pre.classList.add('ready'); // @deathcuits
+                setInterval(() => { // @deathcuits
+                    pre.classList.remove('glitch'); // @deathcuits
+                    void pre.offsetWidth; // @deathcuits
+                    pre.classList.add('glitch'); // @deathcuits
+                }, 4200); // @deathcuits
+            }, total + 1500); // @deathcuits
+        })(); // @deathcuits
+/* @deathcuits */
+        (function () { // @deathcuits
+            const tilt = document.getElementById('tilt'); // @deathcuits
+            const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; // @deathcuits
+            let tx = 0, ty = 0;   // @deathcuits
+            let cx = 0, cy = 0;   // @deathcuits
+/* @deathcuits */
+            function aim(e) { // @deathcuits
+                tx = Math.max(-1, Math.min(1, (e.clientX / innerWidth - 0.5) * 2)); // @deathcuits
+                ty = Math.max(-1, Math.min(1, (e.clientY / innerHeight - 0.5) * 2)); // @deathcuits
+            } // @deathcuits
+            function rest() { tx = 0; ty = 0; } // @deathcuits
+/* @deathcuits */
+            addEventListener('pointermove', aim, { passive: true }); // @deathcuits
+            addEventListener('pointerdown', aim, { passive: true }); // @deathcuits
+            document.documentElement.addEventListener('pointerleave', rest); // @deathcuits
+            addEventListener('blur', rest); // @deathcuits
+            addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') rest(); }); // @deathcuits
+/* @deathcuits */
+            function frame() { // @deathcuits
+                const dx = tx - cx, dy = ty - cy; // @deathcuits
+                if (Math.abs(dx) > 0.0004 || Math.abs(dy) > 0.0004) { // @deathcuits
+                    cx += dx * 0.085; // @deathcuits
+                    cy += dy * 0.085; // @deathcuits
+                    const k = reduce ? 0 : 1; // @deathcuits
+                    const moveX = Math.min(40, innerWidth * 0.05); // @deathcuits
+                    const moveY = Math.min(28, innerHeight * 0.04); // @deathcuits
+                    tilt.style.setProperty('--tx', (cx * moveX * k).toFixed(2) + 'px'); // @deathcuits
+                    tilt.style.setProperty('--ty', (cy * moveY * k).toFixed(2) + 'px'); // @deathcuits
+                    tilt.style.setProperty('--ry', (cx * 11 * k).toFixed(2) + 'deg'); // @deathcuits
+                    tilt.style.setProperty('--rx', (-cy * 9 * k).toFixed(2) + 'deg'); // @deathcuits
+                    tilt.style.setProperty('--mx', (50 + cx * 45).toFixed(1) + '%'); // @deathcuits
+                    tilt.style.setProperty('--my', (50 + cy * 45).toFixed(1) + '%'); // @deathcuits
+                } // @deathcuits
+                requestAnimationFrame(frame); // @deathcuits
+            } // @deathcuits
+            requestAnimationFrame(frame); // @deathcuits
+        })(); // @deathcuits
+/* @deathcuits */
+        (function () { // @deathcuits
+            const body = document.getElementById('termBody'); // @deathcuits
+            const row = document.getElementById('termInputRow'); // @deathcuits
+            const inp = document.getElementById('termInput'); // @deathcuits
+            const sleep = (ms) => new Promise(r => setTimeout(r, ms)); // @deathcuits
+            const PROMPT = '<span class="g">iyxei@heiden</span><span class="d">:</span><span class="b">~</span><span class="d">$</span> '; // @deathcuits
+            const ART = [ // @deathcuits
+'⠀⠀⣀⣤⣀⣀⠀⠀⠀⠀⣀⠄⠀⢀⣀⣤⠄⠀⠀⠀⠀', // @deathcuits
+'⣰⠿⣿⣿⣿⣿⣿⣿⣿⡿⠁⣴⣿⡟⠁⠀⠀⠀⠀⠀⠀', // @deathcuits
+'⠁⠀⠀⠈⠉⠉⢉⣾⣿⠁⢰⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀', // @deathcuits
+'⠀⠀⠀⠀⠀⠀⣾⣿⣿⠀⢸⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀', // @deathcuits
+'⠀⠀⠀⠀⠀⠀⣿⣿⣿⠀⢸⣿⣿⣧⠀⠀⠀⠀⠀⠀⠀', // @deathcuits
+'⠀⠀⢀⣤⣤⣤⣿⣿⣿⠀⠈⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀', // @deathcuits
+'⠀⠀⠉⠉⠙⠿⣿⣿⣿⡇⠀⣿⣿⡿⠀⠀⠀⠀⠀⠀⠀', // @deathcuits
+'⠀⠀⠀⢀⣤⣤⣿⣿⣿⠃⢠⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀', // @deathcuits
+'⠀⠀⠀⠀⠉⠛⣿⣿⡿⠀⣼⡿⠃⠀⠀⠀⠀⠀⠀⠀⠀', // @deathcuits
+'⠀⠀⠀⠀⠀⠀⣼⣿⢁⡼⠏⢀⣀⣀⣀⠀⠀⠀⠀⠀⠀', // @deathcuits
+'⠀⠀⠀⠀⠀⣰⣿⣵⣿⣷⣿⣿⣿⣿⣿⣿⣷⣦⣄⡠⠄', // @deathcuits
+'⠀⠀⠀⣠⠾⠛⠋⠉⠉⠉⠉⠉⠉⠙⠛⢿⣿⣿⠋⠀⠀', // @deathcuits
+'⠀⠀⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀' // @deathcuits
+            ]; // @deathcuits
+            const INFO = [ // @deathcuits
+'<span class="g">iyxei</span>@<span class="g">heiden</span>', // @deathcuits
+'-------------', // @deathcuits
+'<span class="b">OS</span>: Arch Linux x86_64', // @deathcuits
+'<span class="b">Host</span>: Iphone 16 Pro Max', // @deathcuits
+'<span class="b">Kernel</span>: 6.9.7-heiden', // @deathcuits
+'<span class="b">Uptime</span>: 1337 days, 4 hours', // @deathcuits
+'<span class="b">Shell</span>: zsh 5.9', // @deathcuits
+'<span class="b">WM</span>: i3', // @deathcuits
+'<span class="b">Terminal</span>: kitty terminal &gt;.&lt;', // @deathcuits
+'<span class="b">CPU</span>: Ryzen 9 7950X', // @deathcuits
+'<span class="b">Memory</span>: 6969MiB / 32768MiB', // @deathcuits
+'', // @deathcuits
+'<span style="color:#f87171">███</span><span style="color:#facc15">███</span><span style="color:#4ade80">███</span><span style="color:#22d3ee">███</span><span style="color:#60a5fa">███</span><span style="color:#c084fc">███</span>' // @deathcuits
+            ].join('\n'); // @deathcuits
+/* @deathcuits */
+            let busy = false, started = false; // @deathcuits
+            const history = []; let hi = 0; // @deathcuits
+/* @deathcuits */
+            function line(html) { // @deathcuits
+                const d = document.createElement('div'); // @deathcuits
+                d.className = 'tl'; // @deathcuits
+                d.innerHTML = html; // @deathcuits
+                body.insertBefore(d, row); // @deathcuits
+                body.scrollTop = body.scrollHeight; // @deathcuits
+                return d; // @deathcuits
+            } // @deathcuits
+            async function typeCmd(cmd, prompt) { // @deathcuits
+                const d = line(prompt || PROMPT); // @deathcuits
+                const t = document.createElement('span'); // @deathcuits
+                d.appendChild(t); // @deathcuits
+                for (const ch of cmd) { t.textContent += ch; await sleep(30 + Math.random() * 45); } // @deathcuits
+                await sleep(260); // @deathcuits
+            } // @deathcuits
+            function neofetch() { // @deathcuits
+                const d = line(''); // @deathcuits
+                d.className = 'tl nf'; // @deathcuits
+                d.innerHTML = '<pre class="nf-art">' + ART.join('\n') + '</pre><pre class="nf-info">' + INFO + '</pre>'; // @deathcuits
+                body.scrollTop = body.scrollHeight; // @deathcuits
+            } // @deathcuits
+            async function bar(label) { // @deathcuits
+                const d = line(''); // @deathcuits
+                for (let i = 0; i <= 20; i++) { // @deathcuits
+                    d.innerHTML = '<span class="c">' + label + '</span> [' + '█'.repeat(i) + '<span class="d">' + '░'.repeat(20 - i) + '</span>] ' + (i * 5) + '%'; // @deathcuits
+                    await sleep(45); // @deathcuits
+                } // @deathcuits
+            } // @deathcuits
+            async function exploitDemo() { // @deathcuits
+                const steps = [ // @deathcuits
+                    [500, '<span class="b">[*]</span> target: https://senate.gov.ph'], // @deathcuits
+                    [600, '<span class="b">[*]</span> fingerprinting service...'], // @deathcuits
+                    [500, '<span class="g">[+]</span> server: heiden-httpd/2.4.1 (TLS 1.3)'], // @deathcuits
+                    [600, '<span class="b">[*]</span> matching known issues...'], // @deathcuits
+                    [700, '<span class="r">[!]</span> <span class="y">CVE-2026-31337</span>'], // @deathcuits
+                    [250, '    unsafe deserialization in /api/session'], // @deathcuits
+                    [250, '    unauthenticated  |  CVSS 9.8  |  RCE'] // @deathcuits
+                ]; // @deathcuits
+                for (const [ms, html] of steps) { await sleep(ms); line(html); } // @deathcuits
+                await sleep(500); await bar('stage 1/3 payload  '); // @deathcuits
+                await bar('stage 2/3 handshake '); // @deathcuits
+                await bar('stage 3/3 trigger   '); // @deathcuits
+                await sleep(500); // @deathcuits
+                line('<span class="g">[+]</span> code execution achieved'); // @deathcuits
+                await sleep(500); // @deathcuits
+                line('<span class="g">[+]</span> shell opened on localhost:8080'); // @deathcuits
+                await sleep(500); // @deathcuits
+                await typeCmd('id', '<span class="r">heiden@localhost</span><span class="d">:</span><span class="b">~</span><span class="r">#</span> '); // @deathcuits
+                line('uid=0(root) gid=0(root) groups=0(root)'); // @deathcuits
+                await sleep(400); // @deathcuits
+                line('<span class="d">session closed. type</span> help <span class="d">for commands.</span>'); // @deathcuits
+            } // @deathcuits
+            async function runHeiden() { // @deathcuits
+                neofetch(); // @deathcuits
+                await typeCmd('python heiden.py'); // @deathcuits
+                line('<span class="d">heiden.py v1.3.37 loaded</span>'); // @deathcuits
+                await sleep(900); // @deathcuits
+                await exploitDemo(); // @deathcuits
+            } // @deathcuits
+/* @deathcuits */
+            const COMMANDS = { // @deathcuits
+                help: () => line('commands: <span class="g">help affiliations neofetch whoami ls python heiden.py clear</span>'), // @deathcuits
+                affiliations: () => ['dxpeboys', 'narnia', 'ransxm', 'heavxn'].forEach(n => line('<span class="g">[$]</span> ' + n)), // @deathcuits
+                neofetch: () => neofetch(), // @deathcuits
+                whoami: () => line('iyxei'), // @deathcuits
+                ls: () => line('<span class="b">heiden.py</span>  README.md'), // @deathcuits
+                exit: () => line('nice try.'), // @deathcuits
+                clear: () => { [...body.querySelectorAll('.tl:not(.term-input)')].forEach(n => n.remove()); } // @deathcuits
+            }; // @deathcuits
+/* @deathcuits */
+            async function exec(raw) { // @deathcuits
+                const cmd = raw.trim(); // @deathcuits
+                const echo = line(PROMPT); // @deathcuits
+                const t = document.createElement('span'); t.textContent = raw; echo.appendChild(t); // @deathcuits
+                if (!cmd) return; // @deathcuits
+                history.push(cmd); hi = history.length; // @deathcuits
+                if (cmd === 'python heiden.py' || cmd === 'python3 heiden.py') { await runHeiden(); return; } // @deathcuits
+                if (COMMANDS[cmd]) { COMMANDS[cmd](); return; } // @deathcuits
+                line('zsh: command not found: ' + cmd.replace(/</g, '&lt;')); // @deathcuits
+            } // @deathcuits
+/* @deathcuits */
+            function setBusy(v) { // @deathcuits
+                busy = v; // @deathcuits
+                row.classList.toggle('on', !v); // @deathcuits
+                if (!v) { body.scrollTop = body.scrollHeight; inp.focus({ preventScroll: true }); } // @deathcuits
+            } // @deathcuits
+/* @deathcuits */
+            inp.addEventListener('keydown', async (e) => { // @deathcuits
+                if (e.key === 'Enter') { // @deathcuits
+                    const v = inp.value; inp.value = ''; // @deathcuits
+                    if (v.trim() === 'clear') { COMMANDS.clear(); return; } // @deathcuits
+                    setBusy(true); await exec(v); setBusy(false); // @deathcuits
+                } else if (e.key === 'ArrowUp' && history.length) { // @deathcuits
+                    hi = Math.max(0, hi - 1); inp.value = history[hi]; e.preventDefault(); // @deathcuits
+                } else if (e.key === 'ArrowDown') { // @deathcuits
+                    hi = Math.min(history.length, hi + 1); inp.value = history[hi] || ''; e.preventDefault(); // @deathcuits
+                } // @deathcuits
+            }); // @deathcuits
+            body.addEventListener('click', () => { if (!busy) inp.focus({ preventScroll: true }); }); // @deathcuits
+/* @deathcuits */
+            window.startTerminal = async function () { // @deathcuits
+                if (started) return; started = true; // @deathcuits
+                setBusy(true); // @deathcuits
+                await runHeiden(); // @deathcuits
+                setBusy(false); // @deathcuits
+            }; // @deathcuits
+        })(); // @deathcuits
+/* @deathcuits */
+        function profileCard(uid) { // @deathcuits
+            return { // @deathcuits
+                entered: false, // @deathcuits
+                name: 'Loading...', // @deathcuits
+                username: 'loading', // @deathcuits
+                avatar: 'https://cdn.discordapp.com/embed/avatars/0.png', // @deathcuits
+                banner: 'https://i.pinimg.com/736x/a8/58/47/a85847abccfa9eb0f3610318759aa0ff.jpg', // @deathcuits
+                decoration: null, // @deathcuits
+                status: 'offline', // @deathcuits
+                memberSince: 'Loading date...', // @deathcuits
+                customStatus: '', // @deathcuits
+                customStatusEmoji: '', // @deathcuits
+                isSpotify: false, // @deathcuits
+                spotify: {}, // @deathcuits
+                hasActivity: false, // @deathcuits
+                activity: {}, // @deathcuits
+                activityImage: null, // @deathcuits
+/* @deathcuits */
+                enter() { // @deathcuits
+                    this.entered = true; // @deathcuits
+                    audio.play().catch(() => {}); // @deathcuits
+                    setTimeout(() => window.startTerminal && window.startTerminal(), 3000); // @deathcuits
+                }, // @deathcuits
+/* @deathcuits */
+                calculateMemberSince() { // @deathcuits
+                    try { // @deathcuits
+                        const timestamp = Number((BigInt(uid) >> 22n) + 1420070400000n); // @deathcuits
+                        const date = new Date(timestamp); // @deathcuits
+                        this.memberSince = date.toLocaleDateString('en-US', { // @deathcuits
+                            month: 'short', day: '2-digit', year: 'numeric' // @deathcuits
+                        }); // @deathcuits
+                    } catch (e) { // @deathcuits
+                        this.memberSince = 'Unknown Date'; // @deathcuits
+                    } // @deathcuits
+                }, // @deathcuits
+/* @deathcuits */
+                async init() { // @deathcuits
+                    this.calculateMemberSince(); // @deathcuits
+                    const fetchPresence = async () => { // @deathcuits
+                        try { // @deathcuits
+                            const r = await fetch(`https://api.lanyard.rest/v1/users/${uid}`); // @deathcuits
+                            const { data } = await r.json(); // @deathcuits
+                            const user = data.discord_user; // @deathcuits
+                            this.name = user.global_name || user.username; // @deathcuits
+                            this.username = user.username; // @deathcuits
+                            this.status = data.discord_status; // @deathcuits
+                            this.avatar = user.avatar // @deathcuits
+                                ? `https://cdn.discordapp.com/avatars/${uid}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256` // @deathcuits
+                                : `https://cdn.discordapp.com/embed/avatars/${Number((BigInt(uid) >> 22n) % 6n)}.png`; // @deathcuits
+                            const decAsset = user.avatar_decoration_data?.asset; // @deathcuits
+                            this.decoration = decAsset ? `https://cdn.discordapp.com/avatar-decoration-presets/${decAsset}.png` : null; // @deathcuits
+                            const customAct = data.activities.find(a => a.type === 4); // @deathcuits
+                            this.customStatus = customAct ? customAct.state || '' : ''; // @deathcuits
+                            this.customStatusEmoji = customAct ? customAct.emoji?.name || '' : ''; // @deathcuits
+                            this.isSpotify = data.listening_to_spotify; // @deathcuits
+                            if (this.isSpotify) this.spotify = data.spotify; // @deathcuits
+                            const act = data.activities.find(a => a.type !== 4 && a.id !== "spotify:1"); // @deathcuits
+                            this.hasActivity = !!act; // @deathcuits
+                            if (act) { // @deathcuits
+                                this.activity = act; // @deathcuits
+                                if (act.assets && act.assets.large_image) { // @deathcuits
+                                    let img = act.assets.large_image; // @deathcuits
+                                    this.activityImage = img.startsWith("mp:external/") // @deathcuits
+                                        ? `https://media.discordapp.net/external/${img.replace("mp:external/", "")}` // @deathcuits
+                                        : `https://cdn.discordapp.com/app-assets/${act.application_id}/${img}.png`; // @deathcuits
+                                } else { // @deathcuits
+                                    this.activityImage = null; // @deathcuits
+                                } // @deathcuits
+                            } // @deathcuits
+                        } catch (e) {} // @deathcuits
+                    }; // @deathcuits
+                    fetchPresence(); // @deathcuits
+                    setInterval(fetchPresence, 3000); // @deathcuits
+                } // @deathcuits
+            } // @deathcuits
+        } // @deathcuits
+/* @deathcuits */
+        document.addEventListener('alpine:init', () => { // @deathcuits
+            Alpine.data('musicPlayer', () => ({ // @deathcuits
+                playing: false, // @deathcuits
+                currentTime: 0, // @deathcuits
+                duration: 0, // @deathcuits
+                progress: 0, // @deathcuits
+                shuffle: false, // @deathcuits
+                repeat: false, // @deathcuits
+                liked: false, // @deathcuits
+                albumCover: getComputedStyle(document.documentElement).getPropertyValue('--player-album').trim().replace(/^url\(["']?|["']?\)$/g, ''), // @deathcuits
+                init() { // @deathcuits
+                    audio.addEventListener('loadedmetadata', () => { this.duration = audio.duration; }); // @deathcuits
+                    audio.addEventListener('timeupdate', () => { // @deathcuits
+                        this.currentTime = audio.currentTime; // @deathcuits
+                        this.progress = (audio.currentTime / audio.duration) * 100 || 0; // @deathcuits
+                    }); // @deathcuits
+                    audio.addEventListener('play', () => { this.playing = true; }); // @deathcuits
+                    audio.addEventListener('pause', () => { this.playing = false; }); // @deathcuits
+                    audio.addEventListener('ended', () => { // @deathcuits
+                        if (this.repeat) { // @deathcuits
+                            audio.currentTime = 0; // @deathcuits
+                            audio.play(); // @deathcuits
+                        } else { // @deathcuits
+                            this.playing = false; // @deathcuits
+                        } // @deathcuits
+                    }); // @deathcuits
+                    if (audio.readyState >= 1) this.duration = audio.duration; // @deathcuits
+                }, // @deathcuits
+                toggle() { audio.paused ? audio.play() : audio.pause(); }, // @deathcuits
+                prev() { audio.currentTime = 0; if (audio.paused) audio.play(); }, // @deathcuits
+                next() { audio.currentTime = 0; if (audio.paused) audio.play(); }, // @deathcuits
+                seek(event) { // @deathcuits
+                    const rect = event.currentTarget.getBoundingClientRect(); // @deathcuits
+                    const fraction = (event.clientX - rect.left) / rect.width; // @deathcuits
+                    if (isFinite(audio.duration)) audio.currentTime = fraction * audio.duration; // @deathcuits
+                }, // @deathcuits
+                formatTime(seconds) { // @deathcuits
+                    if (isNaN(seconds) || !isFinite(seconds)) return '0:00'; // @deathcuits
+                    const m = Math.floor(seconds / 60); // @deathcuits
+                    const s = Math.floor(seconds % 60); // @deathcuits
+                    return m + ':' + (s < 10 ? '0' : '') + s; // @deathcuits
+                } // @deathcuits
+            })); // @deathcuits
+        }); // @deathcuits
+    </script> <!-- @deathcuits -->
+</body> <!-- @deathcuits -->
+</html> <!-- @deathcuits -->
