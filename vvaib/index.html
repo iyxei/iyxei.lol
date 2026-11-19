@@ -35,7 +35,6 @@
 
         html, body, body *, button, a { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><polygon points='16,2 20.4,11.6 31,13 23.2,20.2 25.2,30.6 16,25.4 6.8,30.6 8.8,20.2 1,13 11.6,11.6' fill='white' stroke='%23000' stroke-width='1.5' stroke-linejoin='round'/></svg>") 16 16, auto !important; }
 
-        /* ---------- Ambient background ---------- */
         .ambient-bg {
             position: absolute;
             inset: -80px;
@@ -60,7 +59,6 @@
             0% { transform: translate(0,0); } 33% { transform: translate(-3%,2%); } 66% { transform: translate(2%,-3%); } 100% { transform: translate(0,0); }
         }
 
-        /* ---------- Intro / ASCII ---------- */
         .entry-screen {
             position: absolute;
             inset: 0;
@@ -166,7 +164,6 @@
         .enter-btn:hover { color: #000; border-color: #fff; letter-spacing: .6em; }
         .enter-btn:hover::before { transform: translateY(0); }
 
-        /* ---------- Main stage ---------- */
         .main-content {
             position: relative;
             z-index: 10;
@@ -212,7 +209,6 @@
             100% { opacity: 1; clip-path: inset(0% 0 0% 0 round 24px); filter: none; transform: scale(1); }
         }
 
-        /* rotating light border */
         .profile-card::before {
             content: ''; position: absolute; inset: 0; border-radius: 24px; padding: 1px; z-index: 6; pointer-events: none;
             background: conic-gradient(from var(--angle), transparent 0 70%, rgba(255,255,255,.7) 85%, transparent 100%);
@@ -222,7 +218,6 @@
         }
         @keyframes spin { to { --angle: 360deg; } }
 
-        /* glossy sheen that follows the cursor */
         .profile-card::after {
             content: ''; position: absolute; inset: 0; border-radius: 24px; z-index: 30; pointer-events: none;
             background:
@@ -230,7 +225,6 @@
                 linear-gradient(125deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 70%, rgba(255,255,255,.08) 100%);
         }
 
-        /* staggered reveal of inner pieces */
         .rise { opacity: 0; transform: translateY(18px); filter: blur(6px); }
         .entered .rise { animation: riseIn .8s var(--ease-out) forwards; animation-delay: calc(1.9s + var(--d, 0) * 120ms); }
         @keyframes riseIn { to { opacity: 1; transform: translateY(0); filter: none; } }
@@ -347,7 +341,6 @@
         .spotify-bar { width: 3px; background: #1DB954; border-radius: 2px; animation: pulseHeight 0.7s infinite alternate ease-in-out; }
         @keyframes pulseHeight { 0% { height: 4px; } 100% { height: 16px; } }
 
-        /* ---------- Socials ---------- */
         .socials { display: flex; justify-content: center; gap: 10px; padding-top: 2px; }
         .soc {
             position: relative; width: 38px; height: 38px; border-radius: 50%;
@@ -375,7 +368,6 @@
             .col-left .chroma-player { width: 380px; }
         }
 
-        /* ---------- Player ---------- */
         .chroma-player {
             width: 380px;
             max-width: 92vw;
@@ -590,7 +582,7 @@
                         </template>
                     </div>
                     <div class="socials rise" style="--d:8">
-                        <a class="soc" href="https://instagram.com/juude.eee" target="_blank" rel="noopener" data-tip="deobfx" aria-label="Instagram"><i class='bx bxl-instagram'></i></a>
+                        <a class="soc" href="https://instagram.com/juude.eee" target="_blank" rel="noopener" data-tip="kai" aria-label="Instagram"><i class='bx bxl-instagram'></i></a>
                         <a class="soc" href="#" x-data="{ c: false }" :data-tip="c ? 'copied!' : 'bvaivlr'" @click.prevent="navigator.clipboard && navigator.clipboard.writeText('bvaivlr'); c = true; setTimeout(() => c = false, 1500)" aria-label="Discord"><i class='bx bxl-discord-alt'></i></a>
                     </div>
                 </div>
@@ -602,7 +594,6 @@
         const audio = new Audio('https://file.garden/aPNQD5oGSn0LJI5K/NIO%20-%20PURE%20FILIPINO%20BLOOD.mp3');
         audio.loop = false;
 
-        /* ---------- ASCII intro sequence ---------- */
         (function () {
             const pre = document.getElementById('ascii');
             const lines = pre.textContent.split('\n');
@@ -622,7 +613,6 @@
                 }, 55);
             }, total);
 
-            // periodic glitch once the lines have landed
             setTimeout(() => {
                 pre.classList.add('ready');
                 setInterval(() => {
@@ -633,12 +623,11 @@
             }, total + 1500);
         })();
 
-        /* ---------- Cursor-following card (smoothed move + tilt + gloss) ---------- */
         (function () {
             const tilt = document.getElementById('tilt');
             const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-            let tx = 0, ty = 0;   // target, -1..1
-            let cx = 0, cy = 0;   // current, smoothed
+            let tx = 0, ty = 0;
+            let cx = 0, cy = 0;
 
             function aim(e) {
                 tx = Math.max(-1, Math.min(1, (e.clientX / innerWidth - 0.5) * 2));
@@ -675,6 +664,7 @@
         function profileCard(uid) {
             return {
                 entered: false,
+                loaded: false,
                 name: 'Loading...',
                 username: 'loading',
                 avatar: 'https://cdn.discordapp.com/embed/avatars/0.png',
@@ -707,43 +697,107 @@
                     }
                 },
 
-                async init() {
-                    this.calculateMemberSince();
-                    const fetchPresence = async () => {
-                        try {
-                            const r = await fetch(`https://api.lanyard.rest/v1/users/${uid}`);
-                            const { data } = await r.json();
-                            const user = data.discord_user;
-                            this.name = user.global_name || user.username;
-                            this.username = user.username;
-                            this.status = data.discord_status;
-                            this.avatar = user.avatar
-                                ? `https://cdn.discordapp.com/avatars/${uid}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256`
-                                : `https://cdn.discordapp.com/embed/avatars/${Number((BigInt(uid) >> 22n) % 6n)}.png`;
-                            const decAsset = user.avatar_decoration_data?.asset;
-                            this.decoration = decAsset ? `https://cdn.discordapp.com/avatar-decoration-presets/${decAsset}.png` : null;
-                            const customAct = data.activities.find(a => a.type === 4);
-                            this.customStatus = customAct ? customAct.state || '' : '';
-                            this.customStatusEmoji = customAct ? customAct.emoji?.name || '' : '';
-                            this.isSpotify = data.listening_to_spotify;
-                            if (this.isSpotify) this.spotify = data.spotify;
-                            const act = data.activities.find(a => a.type !== 4 && a.id !== "spotify:1");
-                            this.hasActivity = !!act;
-                            if (act) {
-                                this.activity = act;
-                                if (act.assets && act.assets.large_image) {
-                                    let img = act.assets.large_image;
-                                    this.activityImage = img.startsWith("mp:external/")
-                                        ? `https://media.discordapp.net/external/${img.replace("mp:external/", "")}`
-                                        : `https://cdn.discordapp.com/app-assets/${act.application_id}/${img}.png`;
-                                } else {
-                                    this.activityImage = null;
-                                }
-                            }
-                        } catch (e) {}
+                apply(data) {
+                    if (!data || !data.discord_user) return;
+                    const user = data.discord_user;
+                    const activities = Array.isArray(data.activities) ? data.activities : [];
+
+                    this.loaded = true;
+                    this.name = user.global_name || user.username || 'unknown';
+                    this.username = user.username || 'unknown';
+                    this.status = data.discord_status || 'offline';
+
+                    if (user.avatar) {
+                        const ext = user.avatar.startsWith('a_') ? 'gif' : 'png';
+                        this.avatar = `https://cdn.discordapp.com/avatars/${uid}/${user.avatar}.${ext}?size=256`;
+                    } else {
+                        this.avatar = `https://cdn.discordapp.com/embed/avatars/${Number((BigInt(uid) >> 22n) % 6n)}.png`;
+                    }
+
+                    const decAsset = user.avatar_decoration_data && user.avatar_decoration_data.asset;
+                    this.decoration = decAsset ? `https://cdn.discordapp.com/avatar-decoration-presets/${decAsset}.png` : null;
+
+                    const custom = activities.find(a => a.type === 4);
+                    this.customStatus = custom && custom.state ? custom.state : '';
+                    this.customStatusEmoji = custom && custom.emoji && custom.emoji.name ? custom.emoji.name : '';
+
+                    this.isSpotify = !!(data.listening_to_spotify && data.spotify);
+                    this.spotify = this.isSpotify ? data.spotify : {};
+
+                    const act = activities.find(a => a.type !== 4 && a.type !== 2 && a.id !== 'spotify:1');
+                    this.hasActivity = !!act;
+                    this.activity = act || {};
+                    this.activityImage = null;
+
+                    if (act && act.assets && act.assets.large_image) {
+                        const img = act.assets.large_image;
+                        if (img.startsWith('mp:external/')) {
+                            this.activityImage = `https://media.discordapp.net/external/${img.replace('mp:external/', '')}`;
+                        } else if (img.startsWith('mp:')) {
+                            this.activityImage = `https://media.discordapp.net/${img.replace('mp:', '')}`;
+                        } else if (act.application_id) {
+                            this.activityImage = `https://cdn.discordapp.com/app-assets/${act.application_id}/${img}.png`;
+                        }
+                    }
+                },
+
+                async fetchRest() {
+                    try {
+                        const r = await fetch(`https://api.lanyard.rest/v1/users/${uid}`);
+                        const json = await r.json();
+                        if (json && json.success && json.data) {
+                            this.apply(json.data);
+                        } else if (!this.loaded) {
+                            this.name = 'unknown';
+                            this.username = 'unknown';
+                        }
+                    } catch (e) {
+                        if (!this.loaded) {
+                            this.name = 'unknown';
+                            this.username = 'unknown';
+                        }
+                    }
+                },
+
+                connect(delay = 1000) {
+                    let ws;
+                    let heartbeat;
+                    try {
+                        ws = new WebSocket('wss://api.lanyard.rest/socket');
+                    } catch (e) {
+                        return;
+                    }
+
+                    ws.onmessage = (event) => {
+                        let msg;
+                        try { msg = JSON.parse(event.data); } catch (e) { return; }
+
+                        if (msg.op === 1) {
+                            ws.send(JSON.stringify({ op: 2, d: { subscribe_to_id: uid } }));
+                            clearInterval(heartbeat);
+                            heartbeat = setInterval(() => {
+                                if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ op: 3 }));
+                            }, (msg.d && msg.d.heartbeat_interval) || 30000);
+                        } else if (msg.op === 0 && (msg.t === 'INIT_STATE' || msg.t === 'PRESENCE_UPDATE')) {
+                            this.apply(msg.d);
+                        }
                     };
-                    fetchPresence();
-                    setInterval(fetchPresence, 3000);
+
+                    ws.onopen = () => { delay = 1000; };
+
+                    ws.onclose = () => {
+                        clearInterval(heartbeat);
+                        setTimeout(() => this.connect(Math.min(delay * 2, 30000)), delay);
+                    };
+
+                    ws.onerror = () => { try { ws.close(); } catch (e) {} };
+                },
+
+                init() {
+                    this.calculateMemberSince();
+                    this.fetchRest();
+                    this.connect();
+                    setInterval(() => this.fetchRest(), 30000);
                 }
             }
         }
